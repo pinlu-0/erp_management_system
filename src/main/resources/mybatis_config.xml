@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!--设定日志，自动映射-->
+    <settings>
+        <!-- 配置标准日志 -->
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+        <!-- 配置自动映射，所有情况都可以自动映射（数据库表中的列和类中属性进行对应） -->
+        <setting name="autoMappingBehavior" value="FULL"/>
+    </settings>
+
+    <!--起别名-->
+    <typeAliases>
+        <package name="com.aaa.model"/>
+    </typeAliases>
+
+</configuration>

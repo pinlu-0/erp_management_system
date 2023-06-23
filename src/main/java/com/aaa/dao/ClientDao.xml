@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.ClientDao">
+    <!--外键处理-->
+    <resultMap id="clumap" type="client">
+        <id column="clie_id" property="clie_id"/>
+        <result property="oper_id" column="oper_id"/>
+        <association property="operator" column="oper_id"  javaType="operator"/>
+    </resultMap>
+    <!--条件查询-->
+    <select id="all" parameterType="client" resultMap="clumap">
+        select * from client_bill cc,operator_bill o
+        <where>
+            cc.oper_id=o.oper_id
+            <if test="clie_short_name != null and clie_short_name != ''">
+                and clie_short_name like  concat('%',concat(#{clie_short_name},'%'))
+            </if>
+            <if test="clie_name != null and clie_name != ''">
+                and clie_name like  concat('%',concat(#{clie_name},'%'))
+            </if>
+            <if test="clie_spell_code != null and clie_spell_code != ''">
+                and clie_spell_code like  concat('%',concat(#{clie_spell_code},'%'))
+            </if>
+        </where>
+        order by clie_id
+    </select>
+
+    <!--添加-->
+    <insert id="add" parameterType="client">
+      insert into client_bill(clie_spell_code,clie_short_name,clie_name,clie_link_man,clie_address,clie_post_code,
+     clie_tel,clie_fax,clie_bank,clie_iban,clie_creditlimt,oper_id)
+       values(#{clie_spell_code},#{clie_short_name},#{clie_name},#{clie_link_man},
+      #{clie_address},#{clie_post_code},#{clie_tel},
+      #{clie_fax},#{clie_bank},#{clie_iban},#{clie_creditlimt},#{oper_id})
+  </insert>
+    <!--删除-->
+    <delete id="del" parameterType="Integer">
+        delete from client_bill where clie_id=#{clie_id}
+    </delete>
+    <!--修改-->
+    <select id="selectbyid" parameterType="Integer" resultType="client">
+         select * from client_bill where clie_id=#{clie_id}
+    </select>
+    <update id="upd" parameterType="client">
+        update client_bill
+        <set>
+            clie_spell_code=#{clie_spell_code},
+            clie_short_name=#{clie_short_name},
+            clie_name=#{clie_name},
+            clie_link_man=#{clie_link_man},
+            clie_address=#{clie_address},
+            clie_post_code=#{clie_post_code},
+            clie_tel=#{clie_tel},
+            clie_fax=#{clie_fax},
+            clie_bank=#{clie_bank},
+            clie_iban=#{clie_iban},
+            clie_creditlimt=#{clie_creditlimt},
+            oper_id=#{oper_id}
+        </set>
+        where clie_id=#{clie_id}
+    </update>
+    <!--多选删除-->
+    <delete id="batchDel">
+        delete from client_bill where clie_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <!--业务员下拉框-->
+    <select id="opall" resultType="operator">
+         select * from operator_bill
+    </select>
+</mapper>

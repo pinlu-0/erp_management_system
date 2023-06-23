@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://wwww.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>供货商信息</title>
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
+    <script src="/bootstrap-3.3.7-dist/js/jquery-3.1.1.js"></script>
+    <script src="/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+   <!-- <%&#45;&#45;    引入下拉列表框&#45;&#45;%>-->
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap-select.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/bootstrap-3.3.7-dist/js/bootstrap-select.min.js"></script>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css" media="all">
+</head>
+<style>
+    .form-control{
+        height: 30px;
+        width: 220px;
+
+    }
+    th{
+        text-align: center;
+    }
+</style>
+<body>
+
+<div class="container  table table-hover" style="background-color: #ffffff;padding: 50px">
+
+    <!--条件查询-->
+    <form action="/Suppliers/all" method="get">
+        <label>拼音编码：</label>
+        <input type="text"  name="supp_spell_code" th:value="${su.supp_spell_code}" style="height: 30px">
+        <label>简称：</label>
+        <input type="text"  name="supp_short_name" th:value="${su.supp_short_name}" style="height: 30px">
+        <label >姓名：</label>
+        <input type="text"   name="supp_name" th:value="${su.supp_name}" style="height: 30px">
+        <button type="submit" class="btn btn-default">查询</button>
+    </form>
+    <button class="btn btn-primary" onclick="batchDel()">批量删除</button>
+    <button class="btn btn-primary" onclick="add()">新增</button>
+    <div class="table-responsive">
+        <table class="table table-hover " border="1px" cellpadding="1px" cellspacing="1px" >
+            <thead style="text-align: center">
+            <th><input type="checkbox" id="all">全选</th>
+            <th>拼音编码</th>
+            <th>简称</th>
+            <th>姓名</th>
+            <th>地址</th>
+            <th>邮编</th>
+            <th>类型</th>
+            <th>电话</th>
+            <th>传真</th>
+            <th>开户行</th>
+            <th>银行账户</th>
+            <th>库房地址</th>
+            <th>库房电话</th>
+            <th>业务员</th>
+            <th>操作</th>
+            </thead>
+            <tbody class=".table-striped .table-bordered" >
+            <!-- class="active,success,info,warning,danger"代表不同的颜色-->
+
+                <tr th:each="s:${supll}" style="text-align: center;width: 130px">
+                    <td>
+                        <input type="checkbox" name="id[]" th:value="${s.supp_id}">
+                    </td>
+                    <td th:text="${s.supp_spell_code}"></td>
+                    <td th:text="${s.supp_short_name}"></td>
+                    <td th:text="${s.supp_name}"></td>
+                    <td th:text="${s.supp_address}"></td>
+                    <td th:text="${s.supp_post_code}"></td>
+                    <td th:text="${s.supp_sort}"></td>
+                    <td th:text="${s.supp_tel}"></td>
+                    <td th:text="${s.supp_fax}"></td>
+                    <td th:text="${s.supp_bank}"></td>
+                    <td th:text="${s.supp_iban}"></td>
+                    <td th:text="${s.supp_storage_address}"></td>
+                    <td th:text="${s.supp_storage_tel}"></td>
+                    <td th:text="${s.operator.oper_name}"></td>
+                    <td>
+                        <button id="goEdit" class="btn btn-info" th:onclick="'javascript:edit('+${s.supp_id}+');'">编辑</button>
+                        <button id="del" class="btn btn-danger" th:onclick="'javascript:del('+${s.supp_id}+');'">删除</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- 新增信息的模态框 -->
+<div class="modal fade" id="addEdit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalTitle">模态框（Modal）标题</h4>
+            </div>
+            <form id="teacherForm" class="form-horizontal" action="/Suppliers/add" method="post" enctype="multipart/form-data">
+                <input id="supp_id" name="supp_id" type="hidden" >
+                <div class="form-group">
+                    <label for="supp_spell_code" class="col-sm-2 control-label">拼音编码：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="supp_spell_code" name="supp_spell_code">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="supp_short_name" class="col-sm-2 control-label">简称：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="supp_short_name" name="supp_short_name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="supp_name" class="col-sm-2 control-label">姓名：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="supp_name" name="supp_name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">业务员：</label>
+                    <div class="col-sm-10">
+                        <select  class="selectpicker" name="oper_id" id="oper_id" style="width: 30px;height: 180px">
+                            <option th:value="0">请选择</option>
+                            <option th:each="f:${op}"
+                                    th:value="${f.oper_id}"
+                                    th:text="${f.oper_name}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="supp_tel" class="col-sm-2 control-label">电话：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="supp_tel" name="supp_tel" maxlength="11">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="supp_post_code" class="col-sm-2 control-label">邮编：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="supp_post_code" name="supp_post_code" maxlength="6">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="supp_sort" class="col-sm-2 control-label">类型：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="supp_sort" name="supp_sort">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="supp_address" class="col-sm-2 control-label">地址：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="supp_address" name="supp_address">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="supp_fax" class="col-sm-2 control-label">传真：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="supp_fax" name="supp_fax" maxlength="11">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="supp_bank" class="col-sm-2 control-label">开户行：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="supp_bank" name="supp_bank">
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="supp_iban" class="col-sm-2 control-label">银行账户：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="supp_iban" name="supp_iban" maxlength="19">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="supp_storage_address" class="col-sm-2 control-label">库房地址：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="supp_storage_address" name="supp_storage_address">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="supp_storage_tel" class="col-sm-2 control-label">库房电话：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="supp_storage_tel" name="supp_storage_tel" maxlength="8">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" >提交</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+</body>
+<script src="/resources/layui/layui.js"></script>
+<script type="text/javascript">
+    layui.use(['layer', 'element', 'jquery'], function () {
+        var $ = layer = layui.layer
+            , element = layui.element,
+            jquery = layui.jquery;
+    })
+    // 进入编辑页面前的请求,返回json
+    function edit(id) {
+        $.ajax({
+            async: true,
+            type: "POST",
+            url: "/Suppliers/selectByid?id="+id,
+            success: addData,
+            error : function(msg) {
+                alert(msg+"错误数据");
+            },
+            dataType : "json"
+        });
+    }
+    // 查询成功后向模态框插入数据并开启模态框。data是返回的JSON对象
+    function addData(data) {
+        $("#supp_id").val(data.supp_id);
+        $("#supp_spell_code").val(data.supp_spell_code);
+        $("#supp_short_name").val(data.supp_short_name);
+        $("#supp_name").val(data.supp_name);
+        $("#supp_address").val(data.supp_address);
+        $("#supp_post_code").val(data.supp_post_code);
+        $("#supp_sort").val(data.supp_sort);
+        $("#supp_tel").val(data.supp_tel);
+        $("#supp_fax").val(data.supp_fax);
+        $("#supp_bank").val(data.supp_bank);
+        $("#supp_iban").val(data.supp_iban);
+        $("#supp_storage_address").val(data.supp_storage_address);
+        $("#supp_storage_tel").val(data.supp_storage_tel);
+
+        $("#oper_id").selectpicker('val',data.oper_id);//下拉框回显
+        $("#ModalTitle").text("修改供货商信息");
+        $("#teacherForm").attr("action","/Suppliers/upd");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+    //显示新增模态框
+    function add() {
+
+        $("#supp_id").val("");
+        $("#supp_spell_code").val("");
+        $("#supp_short_name").val("");
+        $("#supp_name").val("");
+        $("#supp_address").val("");
+        $("#supp_post_code").val("");
+        $("#supp_sort").val("");
+        $("#supp_tel").val("");
+        $("#supp_fax").val("");
+        $("#supp_bank").val("");
+        $("#supp_iban").val("");
+        $("#supp_storage_address").val("");
+        $("#supp_storage_tel").val("");
+        $("#oper_id").selectpicker('val',[[${session.userid}]]);
+        $("#ModalTitle").text("新增供货商信息");
+        $("#teacherForm").attr("action","/Suppliers/add");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+
+    // 删除请求
+    function del(id) {
+        var r=confirm("确定删除吗");
+        if (r==true){
+            $.ajax({
+                async: true,
+                type: "GET",
+                dataType:"text",
+                url: "/Suppliers/del?id="+id,
+                success: function () {
+                    location.href="/Suppliers/all";
+                },
+                error : function(msg) {
+                    alert(msg+"错误数据");
+                }
+            });
+        }
+    }
+
+    //全选操作,选中属性对应“checked”和“selected”通常用prop设定
+    $("#all").click(function () {
+        if(this.checked){
+            $(":checkbox[name='id[]']").prop("checked",true);
+        }else {
+            $(":checkbox[name='id[]']").prop("checked",false);
+        }
+    });
+    //单选操作
+    $(":checkbox[name='id[]']").click(function () {
+        //列表总数量
+        num=$(":checkbox[name='id[]']").length;
+        //选中的数量
+        nn=$(":checkbox[name='id[]']:checked").length;
+        //设定全选框
+        if(num==nn){
+            $("#all").prop("checked",true);
+        }else {
+            $("#all").prop("checked",false);
+        }
+    });
+    function batchDel() {
+        var ids=new Array();
+        num=$(":checkbox[name='id[]']:checked").length;
+        if(num==0){
+            alert('必须选中一行才可以删除！');
+
+        }else {
+            $.each($(":checkbox[name='id[]']:checked"),function (i,v) {
+                ids[i]=this.value;
+            });
+            var r=confirm("确定删除吗");
+            if (r==true){
+                $.ajax({
+                    url:"/Suppliers/batchDel",
+                    type:"POST",
+                    data:{ids:ids},
+                    dataType:"text",
+                    success:function(result){
+                        alert("删除成功")
+                        location.href="/Suppliers/all";
+                    },
+                    error:function(msg){
+                        alert("删除失败")
+                    }
+                });
+
+            }
+        }
+    }
+</script>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://wwww.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
+    <script src="/bootstrap-3.3.7-dist/js/jquery-3.1.1.js"></script>
+    <script src="/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+  <!--      引入下拉列表框-->
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap-select.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/bootstrap-3.3.7-dist/js/bootstrap-select.min.js"></script>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css" media="all">
+</head>
+<style>
+    .form-control{
+        height: 30px;
+        width: 220px;
+        margin-left: -15px;
+    }
+    th{
+        text-align: center;
+    }
+</style>
+
+<body>
+
+
+<div class="container  table table-hover" style="background-color: #ffffff;padding: 50px">
+
+    <!--条件查询-->
+    <form action="/Erp_user/all" method="get">
+        <label >用户账号：</label>
+        <input type="text"  name="u_name" th:value="${erp_user.u_name}" style="height: 30px">
+        <label >用户角色：</label>
+        <select  class="selectpicker" name="r_id">
+            <option th:value="0">请选择</option>
+            <option th:each="f:${rrall}"
+                    th:value="${f.r_id}"
+                    th:text="${f.r_name}"
+                    th:selected="${f.r_id==erp_user.r_id}"
+            ></option>
+        </select>
+        <button type="submit" class="btn btn-default">查询</button>
+    </form>
+    <button class="btn btn-primary" onclick="add()">新增</button>
+    <div class="table-responsive">
+        <table class="table table-hover " border="1px" cellpadding="1px" cellspacing="1px" style="text-align: center">
+            <thead>
+            <th>序号</th>
+            <th>用户账号</th>
+            <th>用户密码</th>
+            <th>角色名称</th>
+            <th>员工姓名</th>
+            <th>员工电话</th>
+            <th>禁用状态</th>
+            <th>操作</th>
+            </thead>
+            <tbody class=".table-striped .table-bordered" >
+            <!-- class="active,success,info,warning,danger"代表不同的颜色-->
+                <tr th:each="c:${uall}">
+                    <td th:text="${c.u_id}"></td>
+                    <td th:text="${c.u_name}"></td>
+                    <td th:text="${c.u_pwd}"></td>
+                    <td th:text="${c.erp_role.r_name}"></td>
+                    <td th:text="${c.operator.oper_name}"></td>
+                    <td th:text="${c.operator.oper_mobile_tel}"></td>
+                    <td>
+                        <p th:if="${c.u_state} eq 0" style="color:red;font-size: 18px">禁用</p>
+                        <p th:if="${c.u_state} eq 1" style="color:green;font-size: 18px">可用</p>
+                    </td>
+                    <td>
+                        <button id="goEdit" class="btn btn-info" th:onclick="'javascript:edit('+${c.u_id}+');'">编辑</button>
+                        <button  class="btn btn-dark" th:onclick="'javascript:jin('+${c.u_id}+');'">禁用</button>
+                        <button  class="btn btn-primary" th:onclick="'javascript:qi('+${c.u_id}+');'">启用</button>
+                        <button id="del" class="btn btn-danger" th:onclick="'javascript:del('+${c.u_id}+');'">删除</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- 新增信息的模态框 -->
+<div class="modal fade" id="addEdit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalTitle">模态框（Modal）标题</h4>
+            </div>
+            <form id="teacherForm" class="form-horizontal" action="/Erp_user/add" method="post" enctype="multipart/form-data">
+                <input id="u_id" name="u_id" type="hidden" >
+                <div class="form-group">
+                    <label for="u_name" class="col-sm-2 control-label">用户账号：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="u_name" name="u_name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="u_pwd" class="col-sm-2 control-label">用户密码：</label>
+                    <div class="col-sm-10">
+                        <input type="password" class="form-control" id="u_pwd" name="u_pwd">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">用户角色：</label>
+                    <select  class="selectpicker" name="r_id" id="r_id">
+                        <option th:value="0">请选择</option>
+                        <option th:each="o:${rrall}"
+                                th:value="${o.r_id}"
+                                th:text="${o.r_name}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">员工：</label>
+                    <select  class="selectpicker" name="oper_id" id="oper_id">
+                        <option th:value="0">请选择</option>
+                        <option th:each="o:${opall}"
+                                th:value="${o.oper_id}"
+                                th:text="${o.oper_name}"></option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" >提交</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+</body>
+<script src="/resources/layui/layui.js"></script>
+<script>
+    layui.use(['layer', 'element', 'jquery'], function () {
+        var $ = layer = layui.layer
+            , element = layui.element,
+            jquery = layui.jquery;
+    })
+    // 进入编辑页面前的请求,返回json
+    function edit(id) {
+        $.ajax({
+            async: true,
+            type: "POST",
+            url: "/Erp_user/selectByid?id="+id,
+            success: addData,
+            error : function(msg) {
+                alert(msg+"错误数据");
+            },
+            dataType : "json"
+        });
+    }
+    // 查询成功后向模态框插入数据并开启模态框。data是返回的JSON对象
+    function addData(data) {
+        $("#u_id").val(data.u_id);
+        $("#u_name").val(data.u_name);
+        $("#u_pwd").val(data.u_pwd);
+        $("#oper_id").selectpicker('val',data.oper_id);//下拉框回显
+        $("#r_id").selectpicker('val',data.r_id);
+
+        $("#ModalTitle").text("修改用户信息");
+        $("#teacherForm").attr("action","/Erp_user/upd");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+    //显示新增模态框
+    function add() {
+        $("#u_id").val("");
+        $("#u_name").val("");
+        $("#u_pwd").val("");
+        $("#oper_id").selectpicker('val',0);//下拉框回显
+        $("#r_id").selectpicker('val',0);
+        $("#ModalTitle").text("新增用户信息");
+        $("#teacherForm").attr("action","/Erp_user/add");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+
+    // 删除请求
+    function del(id) {
+        var r=confirm("确定删除吗");
+        if (r==true){
+            $.ajax({
+                async: true,
+                type: "GET",
+                url: "/Erp_user/del?id="+id,
+                success: function () {
+                    location.href="/Erp_user/all";
+                },
+                error : function(msg) {
+                    alert(msg+"错误数据");
+                },
+                dataType:"text"
+            });
+        }
+    }
+
+
+    /*
+    * 禁用用户
+    * */
+    // 进入编辑页面前的请求,返回json
+    function jin(id) {
+        var r=confirm("确定禁用吗");
+        if(r==true){
+            $.ajax({
+                async: true,
+                type: "POST",
+                url: "/Erp_user/jin?id="+id,
+                success: function () {
+                    location.href="/Erp_user/all";
+                },
+                error : function(msg) {
+                    alert(msg+"错误数据");
+                },
+                dataType:"text"
+            });
+        }
+
+    }
+
+    /*
+   * 启用用户
+   * */
+    // 进入编辑页面前的请求,返回json
+    function qi(id) {
+        var r=confirm("确定启用吗");
+        if(r==true){
+            $.ajax({
+                async: true,
+                type: "POST",
+                url: "/Erp_user/qi?id="+id,
+                success: function () {
+                    location.href="/Erp_user/all";
+                },
+                error : function(msg) {
+                    alert(msg+"错误数据");
+                },
+                dataType:"text"
+            });
+        }
+
+    }
+
+</script>
+</html>
+
+

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.StockDao">
+    <!--外键处理-->
+    <resultMap id="tmap" type="stock">
+        <result property="depot_id" column="depot_id"/>
+        <result property="comm_id" column="comm_id"/>
+        <association property="depot" column="depot_id"  javaType="depot"/>
+        <association property="commodity" column="comm_id"  javaType="commodity"/>
+    </resultMap>
+    <!--条件查询-->
+    <select id="all" parameterType="stock" resultMap="tmap">
+        select * from stock s,depot_bill d,commodity_bill  cb
+        <where>
+           s.depot_id=d.depot_id and s.comm_id=cb.comm_id
+            <if test="depot_id !=null and depot_id!=0">
+                and s.depot_id=#{depot_id}
+            </if>
+            <if test="comm_id !=null and comm_id!=0">
+                and s.comm_id=#{comm_id}
+            </if>
+        </where>
+
+    </select>
+    <!--添加-->
+    <insert id="add" parameterType="stock">
+      insert into stock(depot_id,comm_id,amount,money,oper_id)
+       values(#{depot_id},#{comm_id},#{amount},#{money},#{oper_id})
+  </insert>
+    <!--供货商下拉框-->
+    <select id="deall" resultType="depot">
+         select * from depot_bill
+    </select>
+    <!--商品下拉框-->
+    <select id="coall" resultType="commodity">
+         select * from commodity_bill
+    </select>
+</mapper>

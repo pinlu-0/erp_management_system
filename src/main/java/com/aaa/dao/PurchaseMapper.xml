@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.PurchaseMapper">
+    <!--查询所有订单-->
+    <select id="queryAllPur" resultMap="rm_queryAllPur">
+       select *,DATE_FORMAT(po_date,"%Y-%m-%d") as str_po_date from purchase_orde,
+					 purchase_order_items,
+					 commodity_bill,
+					 suppliers_bill,
+						operator_bill
+        where purchase_orde.supp_id = suppliers_bill.supp_id
+			and purchase_orde.po_id = purchase_order_items.po_id
+			and purchase_order_items.comm_id = commodity_bill.comm_id
+			and operator_bill.oper_id = purchase_orde.oper_id
+			and purchase_order_items.poi_state = 0
+		order by purchase_orde.po_id desc
+    </select>
+    <resultMap id="rm_queryAllPur" type="Orde">
+        <id property="po_id" column="po_id"></id>
+        <collection property="suppliers" ofType="Suppliers"/>
+        <collection property="commodity" ofType="Commodity"/>
+        <collection property="order_items" ofType="Order_items"/>
+        <collection property="operator" ofType="Operator"></collection>
+        <collection property="depot" ofType="Depot"></collection>
+        <collection property="stock" ofType="Stock"></collection>
+    </resultMap>
+    <!--根据id查询订单的详细信息-->
+    <select id="queryOrderById" resultMap="rm_queryAllPur">
+        select *,DATE_FORMAT(po_date,"%Y-%m-%d") as str_po_date from purchase_orde,
+					 purchase_order_items,
+					 commodity_bill,
+					 suppliers_bill,
+						depot_bill,
+						stock
+        where purchase_orde.supp_id = suppliers_bill.supp_id
+			and purchase_orde.po_id = purchase_order_items.po_id
+			and purchase_order_items.comm_id = commodity_bill.comm_id
+			and depot_bill.depot_id = purchase_orde.depot_id
+			and purchase_orde.po_id = #{po_id}
+            and stock.depot_id =  depot_bill.depot_id
+		order by purchase_orde.po_id desc
+    </select>
+    <!--采购订单模糊查询-->
+    <select id="like_search" parameterType="Orde" resultMap="rm_queryAllPur">
+        select * from purchase_orde
+        LEFT JOIN purchase_order_items on purchase_orde.po_id = purchase_order_items.po_id
+        LEFT JOIN commodity_bill on purchase_order_items.comm_id = commodity_bill.comm_id
+        LEFT JOIN suppliers_bill on purchase_orde.supp_id = suppliers_bill.supp_id
+        <where>
+            <if test="order_num != null and order_num != ''">
+                purchase_orde.order_num like #{order_num}
+            </if>
+            <if test="po_date != null">
+                or purchase_orde.po_date like #{po_date}
+            </if>
+            <if test="commodity != null">
+                or commodity_bill.comm_name like  #{commodity.comm_name}
+            </if>
+        </where>
+        order by purchase_orde.po_id desc
+    </select>
+    <!--批量删除-->
+    <delete id="del_bat" parameterType="int">
+        delete from purchase_orde where po_id in
+        <foreach collection="list" item="po_id" open="(" separator="," close=")">
+            #{po_id}
+        </foreach>
+    </delete>
+    <delete id="del_by_Id" parameterType="int">
+        delete from purchase_orde where po_id = #{po_id}
+    </delete>
+    <!--增加订单-->
+    <insert id="add_order" parameterType="Orde" useGeneratedKeys="true" keyProperty="po_id">
+        insert into purchase_orde(supp_id, po_date,cbill,order_num,depot_id,oper_id,remark)
+        value (#{supp_id},#{po_date},#{cbill},#{order_num},#{depot_id},#{oper_id},#{remark})
+    </insert>
+    <!--增加订单详细-->
+    <insert id="add_order_item" parameterType="Order_items">
+        insert into purchase_order_items(po_id, comm_id, poi_count, purc_price) value(#{po_id},#{comm_id},#{poi_count},#{purc_price})
+    </insert>
+    <!--查询供应商-->
+    <select id="queryAllSupplier" resultType="Suppliers">
+        select * from suppliers_bill
+    </select>
+    <!--添加供货商-->
+
+    <!--查询仓库-->
+    <select id="queryAllDepot" resultType="Depot">
+        select  * from depot_bill
+    </select>
+    <!--查询商品-->
+    <select id="queryAllGoods" parameterType="int" resultType="Commodity">
+        select * from  stock
+        LEFT JOIN commodity_bill
+        on stock.comm_id = commodity_bill.comm_id
+        where stock.depot_id = #{depot_id}
+    </select>
+    <!--查询商品信息-->
+    <select id="queryAllGoodsInfo" parameterType="int" resultMap="rm_queryAllGoodsInfo">
+        select * from  (stock
+        LEFT JOIN commodity_bill
+        on stock.comm_id = commodity_bill.comm_id)
+        left join depot_bill on depot_bill.depot_id = stock.depot_id
+        left join purchase_contract on purchase_contract.comm_id = commodity_bill.comm_id
+        left join suppliers_bill on suppliers_bill.supp_id = purchase_contract.supp_id
+        where stock.comm_id = #{comm_id}
+    </select>
+    <resultMap id="rm_queryAllGoodsInfo" type="Stock">
+        <id property="comm_id" column="comm_id"></id>
+        <collection property="commodity" ofType="Commodity"></collection>
+        <collection property="depot" ofType="Depot"></collection>
+        <collection property="contract" ofType="Contract"></collection>
+        <collection property="suppliers" ofType="Suppliers"></collection>
+    </resultMap>
+</mapper>

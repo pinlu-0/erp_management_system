@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://wwww.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>角色信息</title>
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
+    <script src="/bootstrap-3.3.7-dist/js/jquery-3.1.1.js"></script>
+    <script src="/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css" media="all">
+</head>
+<style>
+    .form-control{
+        height: 30px;
+        width: 220px;
+        margin-left: -15px;
+    }
+    th{
+        text-align: center;
+    }
+</style>
+
+<body>
+
+
+<div class="container  table table-hover" style="background-color: #ffffff;padding: 50px">
+    <!--条件查询-->
+    <form action="/Erp_role/all" method="get">
+        <label >角色名称：</label>
+        <input type="text"  name="r_name" th:value="${erp_role.r_name}" style="height: 30px">
+        <label >角色编码：</label>
+        <input type="text"   name="r_code" th:value="${erp_role.r_code}" style="height: 30px">
+        <button type="submit" class="btn btn-default">查询</button>
+    </form>
+    <button class="btn btn-primary" onclick="add()">新增</button>
+    <div class="table-responsive">
+        <table class="table table-hover " border="1px" cellpadding="1px" cellspacing="1px" style="text-align: center">
+            <thead>
+            <th>序号</th>
+            <th>角色名称</th>
+            <th>角色编码</th>
+            <th>角色描述</th>
+            <th>创建时间</th>
+            <th>操作</th>
+            </thead>
+            <tbody class=".table-striped .table-bordered" >
+            <!-- class="active,success,info,warning,danger"代表不同的颜色-->
+
+                <tr th:each="c:${erp_roles}">
+                    <td th:text="${c.r_id}"></td>
+                    <td th:text="${c.r_name}"></td>
+                    <td th:text="${c.r_code}"></td>
+                    <td th:text="${c.r_desc}"></td>
+                    <td th:text="${c.r_date}"></td>
+                    <td>
+                        <button id="goEdit" class="btn btn-info" th:onclick="'javascript:edit('+${c.r_id}+');'">编辑</button>
+                        <button id="del" class="btn btn-danger" th:onclick="'javascript:del('+${c.r_id}+');'">删除</button>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- 新增信息的模态框 -->
+<div class="modal fade" id="addEdit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalTitle">模态框（Modal）标题</h4>
+            </div>
+            <form id="teacherForm" class="form-horizontal" action="/Erp_role/add" method="post" enctype="multipart/form-data">
+                <input id="r_id" name="r_id" type="hidden" >
+                <div class="form-group">
+                    <label for="r_name" class="col-sm-2 control-label">角色名称：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="r_name" name="r_name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="r_code" class="col-sm-2 control-label">角色编码：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="r_code" name="r_code">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="r_desc" class="col-sm-2 control-label">角色描述：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="r_desc" name="r_desc">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" >提交</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+</body>
+<script src="/resources/layui/layui.js"></script>
+<script>
+    layui.use(['layer', 'element', 'jquery'], function () {
+        var $ = layer = layui.layer
+            , element = layui.element,
+            jquery = layui.jquery;
+    })
+    // 进入编辑页面前的请求,返回json
+    function edit(id) {
+        $.ajax({
+            async: true,
+            type: "POST",
+            url: "/Erp_role/selectByid?id="+id,
+            success: addData,
+            error : function(msg) {
+                alert(msg+"错误数据");
+            },
+            dataType : "json"
+        });
+    }
+    // 查询成功后向模态框插入数据并开启模态框。data是返回的JSON对象
+    function addData(data) {
+        $("#r_id").val(data.r_id);
+        $("#r_code").val(data.r_code);
+        $("#r_name").val(data.r_name);
+        $("#r_desc").val(data.r_desc);
+        $("#ModalTitle").text("修改角色信息");
+        $("#teacherForm").attr("action","/Erp_role/upd");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+    //显示新增模态框
+    function add() {
+        $("#r_id").val("");
+        $("#r_code").val("");
+        $("#r_name").val("");
+        $("#r_desc").val("");
+        $("#ModalTitle").text("新增角色信息");
+        $("#teacherForm").attr("action","/Erp_role/add");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+
+    // 删除请求
+    function del(id) {
+        var r=confirm("确定删除吗");
+        if (r==true){
+            $.ajax({
+                async: true,
+                type: "GET",
+                url: "/Erp_role/del?id="+id,
+                success: function () {
+                    location.href="/Erp_role/all";
+                },
+                error : function(msg) {
+                    alert(msg+"错误数据");
+                },
+                dataType:"text"
+            });
+        }
+    }
+
+</script>
+</html>
+
+

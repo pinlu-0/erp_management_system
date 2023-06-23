@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.Erp_userDao">
+    <resultMap id="umap" type="erp_user">
+        <id column="u_id" property="u_id"/>
+        <result column="r_id" property="r_id"/>
+        <result property="oper_id" column="oper_id"/>
+        <association property="erp_role" column="r_id" javaType="erp_role"/>
+        <association property="operator" column="oper_id" javaType="operator"/>
+    </resultMap>
+    <!--条件查询-->
+    <select id="all" parameterType="erp_user" resultMap="umap">
+        select * from erp_user eu,erp_role er,operator_bill ob
+        <where>
+            eu.r_id=er.r_id and eu.oper_id=ob.oper_id
+            <if test="u_name != null and u_name != ''">
+              and u_name like  concat('%',concat(#{u_name},'%'))
+            </if>
+            <if test="r_id !=null and r_id!=0">
+                and eu.r_id=#{r_id}
+            </if>
+        </where>
+        order by u_id
+    </select>
+
+    <!--添加-->
+    <insert id="add" parameterType="erp_user">
+      insert into erp_user(u_name,r_id,oper_id,u_pwd)
+       values(#{u_name},#{r_id},#{oper_id},#{u_pwd})
+  </insert>
+    <!--删除-->
+    <delete id="del" parameterType="Integer">
+        delete from erp_user where u_id=#{u_id}
+    </delete>
+    <!--修改-->
+    <select id="selectbyid" parameterType="Integer" resultType="erp_user">
+         select * from erp_user where u_id=#{u_id}
+    </select>
+    <update id="upd" parameterType="erp_user">
+        update erp_user
+        <set>
+            u_name=#{u_name},
+            r_id=#{r_id},
+            oper_id=#{oper_id},
+            u_pwd=#{u_pwd}
+        </set>
+        where u_id=#{u_id}
+    </update>
+<!--启用用户-->
+    <update id="qi" parameterType="Integer">
+        update erp_user
+        <set>
+           u_state=1
+        </set>
+        where u_id=#{u_id}
+    </update>
+    <!--禁用用户-->
+    <update id="jin" parameterType="Integer">
+        update erp_user
+        <set>
+            u_state=0
+        </set>
+        where u_id=#{u_id}
+    </update>
+    <!--角色下拉框-->
+    <select id="rrall" resultType="erp_role">
+        select * from erp_role
+    </select>
+    <!--员工下拉框-->
+    <select id="opall" resultType="operator">
+    select * from operator_bill
+    </select>
+
+    <!--登录 and u_state=1-->
+    <select id="login" parameterType="java.lang.String" resultMap="rm_login">
+        select * from erp_user e,operator_bill ob where  u_name=#{u_name} and u_pwd=#{u_pwd} and e.oper_id=ob.oper_id
+    </select>
+    <resultMap id="rm_login" type="erp_user">
+        <id column="u_id" property="u_id"/>
+        <collection property="operator" ofType="operator"/>
+    </resultMap>
+</mapper>

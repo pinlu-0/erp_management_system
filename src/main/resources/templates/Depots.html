@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://wwww.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>仓库信息</title>
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
+    <script src="/bootstrap-3.3.7-dist/js/jquery-3.1.1.js"></script>
+    <script src="/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+   <!-- <%&#45;&#45;    引入下拉列表框&#45;&#45;%>-->
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap-select.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/bootstrap-3.3.7-dist/js/bootstrap-select.min.js"></script>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css" media="all">
+</head>
+<style>
+    .form-control{
+        height: 30px;
+        width: 220px;
+
+    }
+    th{
+        text-align: center;
+    }
+</style>
+<body>
+
+<div class="container  table table-hover" style="background-color: #ffffff;padding: 50px">
+    
+    <!--条件查询-->
+    <form action="/dept/all" method="get">
+        <label>仓库名：</label>
+        <input type="text"  name="depot_name" th:value="${de.depot_name}" style="height: 30px">
+        <label>仓库编号：</label>
+        <input type="text"  name="depot_sort" th:value="${de.depot_sort}" style="height: 30px">
+        <label>仓库地址：</label>
+        <input type="text"  name="depot_address" th:value="${de.depot_address}" style="height: 30px">
+        <button type="submit" class="btn btn-default">查询</button>
+    </form>
+    <button class="btn btn-primary" onclick="batchDel()">批量删除</button>
+    <button class="btn btn-primary" onclick="add()">新增</button>
+    <div class="table-responsive">
+        <table class="table table-hover " border="1px" cellpadding="1px" cellspacing="1px" >
+            <thead style="text-align: center">
+            <th><input type="checkbox" id="all">全选</th>
+            <th>仓库名</th>
+            <th>仓库编号</th>
+            <th>仓库地址</th>
+            <th>业务员</th>
+            <th>业务员电话</th>
+            <th>备注</th>
+            <th>操作</th>
+            </thead>
+            <tbody class=".table-striped .table-bordered" >
+            <!-- class="active,success,info,warning,danger"代表不同的颜色-->
+
+                <tr th:each="s:${depts}" style="text-align: center">
+                    <td>
+                        <input type="checkbox" name="id[]" th:value="${s.depot_id}">
+                    </td>
+                    <td th:text="${s.depot_name}"></td>
+                    <td th:text="${s.depot_sort}"></td>
+                    <td th:text="${s.depot_address}"></td>
+                    <td th:text="${s.operator.oper_name}"></td>
+                    <td th:text="${s.operator.oper_mobile_tel}"></td>
+                    <td th:text="${s.depot_desc}"></td>
+                    <td>
+                        <button id="goEdit" class="btn btn-info" th:onclick="'javascript:edit('+${s.depot_id}+');'">编辑</button>
+                        <button id="del" class="btn btn-danger" th:onclick="'javascript:del('+${s.depot_id}+');'">删除</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- 新增信息的模态框 -->
+<div class="modal fade" id="addEdit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalTitle">模态框（Modal）标题</h4>
+            </div>
+            <form id="teacherForm" class="form-horizontal" action="/dept/add" method="post" enctype="multipart/form-data">
+                <input id="depot_id" name="depot_id" type="hidden" >
+                <div class="form-group">
+                    <label for="depot_name" class="col-sm-2 control-label">仓库名：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="depot_name" name="depot_name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">业务员：</label>
+                    <div class="col-sm-10">
+                        <select  class="selectpicker" name="oper_id" id="oper_id" style="width: 30px;height: 180px">
+                            <option value="0">请选择</option>
+                            <option th:each="o:${opall}"
+                                    th:value="${o.oper_id}"
+                                    th:text="${o.oper_name}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="depot_sort" class="col-sm-2 control-label">仓库编号：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="depot_sort" name="depot_sort">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="depot_address" class="col-sm-2 control-label">仓库地址：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="depot_address" name="depot_address">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="depot_desc" class="col-sm-2 control-label">备注：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="depot_desc" name="depot_desc">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" >提交</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+</body>
+<script src="/resources/layui/layui.js"></script>
+<script>
+    layui.use(['layer', 'element', 'jquery'], function () {
+        var $ = layer = layui.layer
+            , element = layui.element,
+            jquery = layui.jquery;
+    })
+    // 进入编辑页面前的请求,返回json
+    function edit(id) {
+        $.ajax({
+            async: true,
+            type: "POST",
+            url: "/dept/selectByid?id="+id,
+            success: addData,
+            error : function(msg) {
+                alert(msg+"错误数据");
+            },
+            dataType : "json"
+        });
+    }
+    // 查询成功后向模态框插入数据并开启模态框。data是返回的JSON对象
+    function addData(data) {
+        $("#depot_id").val(data.depot_id);
+        $("#depot_sort").val(data.depot_sort);
+        $("#depot_name").val(data.depot_name);
+        $("#depot_desc").val(data.depot_desc);
+        $("#depot_address").val(data.depot_address);
+        $("#oper_id").selectpicker('val',data.oper_id);//下拉框回显
+        $("#ModalTitle").text("修改仓库信息");
+        $("#teacherForm").attr("action","/dept/upd");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+    //显示新增模态框
+    function add() {
+        $("#depot_id").val("");
+        $("#depot_name").val("");
+        $("#depot_sort").val("");
+        $("#depot_desc").val("");
+        $("#depot_address").val("");
+
+        $("#oper_id").selectpicker('val',[[${session.userid}]]);
+        $("#ModalTitle").text("新增仓库信息");
+        $("#teacherForm").attr("action","/dept/add");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+
+    // 删除请求
+    function del(id) {
+        var r=confirm("确定删除吗");
+        if (r==true){
+            $.ajax({
+                async: true,
+                type: "GET",
+                url: "/dept/del?id="+id,
+                success: function () {
+                    location.href="/dept/all";
+                },
+                error : function(msg) {
+                    alert(msg+"错误数据");
+                },
+                dataType:"text"
+            });
+        }
+    }
+
+    //全选操作,选中属性对应“checked”和“selected”通常用prop设定
+    $("#all").click(function () {
+        if(this.checked){
+            $(":checkbox[name='id[]']").prop("checked",true);
+        }else {
+            $(":checkbox[name='id[]']").prop("checked",false);
+        }
+    });
+    //单选操作
+    $(":checkbox[name='id[]']").click(function () {
+        //列表总数量
+        num=$(":checkbox[name='id[]']").length;
+        //选中的数量
+        nn=$(":checkbox[name='id[]']:checked").length;
+        //设定全选框
+        if(num==nn){
+            $("#all").prop("checked",true);
+        }else {
+            $("#all").prop("checked",false);
+        }
+    });
+    function batchDel() {
+        var ids=new Array();
+        num=$(":checkbox[name='id[]']:checked").length;
+        if(num==0){
+            alert('必须选中一行才可以删除！');
+
+        }else {
+            $.each($(":checkbox[name='id[]']:checked"),function (i,v) {
+                ids[i]=this.value;
+            });
+            var r=confirm("确定删除吗");
+            if (r==true){
+                $.ajax({
+                    url:"/dept/batchDel",
+                    type:"POST",
+                    data:{ids:ids},
+                    dataType:"text",
+                    success:function(result){
+                        alert("删除成功")
+                        location.href="/dept/all";
+                    },
+                    error:function(msg){
+                        alert("删除失败")
+                    }
+                });
+
+            }
+        }
+    }
+</script>
+</html>
+
+
+

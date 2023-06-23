@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.Sale_orderDao">
+    <!--外键处理-->
+    <resultMap id="smap" type="sale_order">
+        <id column="so_id" property="so_id"/>
+        <result property="oper_id" column="oper_id"/>
+        <result property="clie_id" column="clie_id"/>
+        <association property="operator" column="oper_id"  javaType="operator"/>
+        <association property="client" column="clie_id"  javaType="client"/>
+    </resultMap>
+    <!--条件查询-->
+    <select id="all" parameterType="sale_order" resultMap="smap">
+        select * from sale_order s,operator_bill o,client_bill c
+        <where>
+          s.oper_id=o.oper_id and s.clie_id=c.clie_id
+            <if test="oper_id != null and oper_id != 0">
+                and s.oper_id=#{oper_id}
+            </if>
+            <if test="clie_id != null and clie_id != 0">
+                and s.clie_id=#{clie_id}
+            </if>
+        </where>
+        order by so_id
+    </select>
+
+
+    <!--外键处理-->
+    <resultMap id="smaps" type="sale_order">
+        <id column="so_id" property="so_id"/>
+        <result property="oper_id" column="oper_id"/>
+        <result property="clie_id" column="clie_id"/>
+        <association property="operator" column="oper_id"  javaType="operator"/>
+        <association property="client" column="clie_id"  javaType="client"/>
+    </resultMap>
+    <!--条件查询-->
+    <select id="alls" parameterType="integer" resultMap="smaps">
+        select * from sale_order s,operator_bill o,client_bill c
+        where s.oper_id=o.oper_id and s.clie_id=c.clie_id and so_id=#{so_id}
+    </select>
+    <!--添加-->
+    <insert id="add" parameterType="sale_order">
+      insert into sale_order(oper_id,clie_id,so_date,so_begain_date,so_end_date,cbill)
+       values(#{oper_id},#{clie_id},#{so_date},#{so_begain_date},#{so_end_date},#{cbill})
+  </insert>
+    <!--删除-->
+    <delete id="del" parameterType="Integer">
+        delete from sale_order where so_id=#{so_id}
+    </delete>
+    <!--修改-->
+    <select id="selectbyid" parameterType="Integer" resultType="sale_order">
+         select *,DATE_FORMAT(so_date,"%Y-%m-%d")
+         AS so_dates,DATE_FORMAT(so_begain_date,"%Y-%m-%d")
+         AS so_begain_dates,DATE_FORMAT(so_end_date,"%Y-%m-%d")
+         AS so_end_dates from sale_order where so_id=#{so_id}
+    </select>
+    <update id="upd" parameterType="sale_order">
+        update sale_order
+        <set>
+            clie_id=#{clie_id},
+            so_date=#{so_date},
+            so_begain_date=#{so_begain_date},
+            so_end_date=#{so_end_date},
+            oper_id=#{oper_id},
+            cbill=#{cbill}
+        </set>
+        where so_id=#{so_id}
+    </update>
+    <!--多选删除-->
+    <delete id="batchDel">
+        delete from sale_order where so_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <!--业务员下拉框-->
+    <select id="opall" resultType="operator">
+         select * from operator_bill
+    </select>
+    <!--客户下拉框-->
+    <select id="clall" resultType="client">
+         select * from client_bill
+    </select>
+</mapper>

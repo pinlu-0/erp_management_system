@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.Order_itemsDao">
+    <!--外键处理-->
+    <resultMap id="clumap" type="Order_items">
+        <id column="poi_id" property="poi_id"/>
+        <result property="po_id" column="po_id"/>
+        <result property="comm_id" column="comm_id"/>
+        <collection property="orde" ofType="orde"/>
+        <collection property="commodity" ofType="commodity"/>
+        <collection property="suppliers" ofType="suppliers"/>
+        <collection property="operator" ofType="operator"/>
+        <collection property="depot" ofType="depot"/>
+    </resultMap>
+    <!--条件查询-->
+    <select id="all" parameterType="Order_items" resultMap="clumap">
+        select * from purchase_order_items cc,
+        purchase_orde o,commodity_bill cb,suppliers_bill sb,operator_bill ob,depot_bill db
+        <where>
+            cc.po_id=o.po_id and
+            cc.comm_id=cb.comm_id and
+             o.supp_id = sb.supp_id and o.depot_id=db.depot_id
+            <if test="comm_id !=null and comm_id!=0">
+                and cc.comm_id=#{comm_id}
+            </if>
+            <if test="poi_state !=null and poi_state!=3">
+                and poi_state=#{poi_state}
+            </if>
+        </where>
+        order by poi_id
+    </select>
+
+    <!--添加-->
+    <insert id="add" parameterType="Order_items">
+      insert into purchase_order_items(po_id,comm_id,poi_count,purc_price)
+       values(#{po_id},#{comm_id},#{poi_count},#{purc_price})
+  </insert>
+    <!--删除-->
+    <delete id="del" parameterType="Integer">
+        delete from purchase_order_items where poi_id=#{poi_id}
+    </delete>
+    <!--修改-->
+    <select id="selectbyid" parameterType="Integer" resultMap="clumap">
+        select * from purchase_order_items cc,
+        purchase_orde o,commodity_bill cb,suppliers_bill sb,operator_bill ob
+        where
+        cc.po_id=o.po_id and
+        cc.comm_id=cb.comm_id and
+        o.supp_id = sb.supp_id and poi_id=#{poi_id}
+    </select>
+    <update id="upd" parameterType="Order_items">
+        update purchase_order_items
+        <set>
+            comm_id=#{comm_id},
+            poi_count=#{poi_count},
+            purc_price=#{purc_price}
+        </set>
+        where poi_id=#{poi_id}
+    </update>
+    <update id="shenhe" parameterType="Order_items">
+        update purchase_order_items
+        <set>
+            poi_state=#{poi_state}
+        </set>
+        where poi_id=#{poi_id}
+    </update>
+    <!--多选删除-->
+    <delete id="batchDel">
+        delete from purchase_order_items where poi_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <!--业务员下拉框-->
+    <!--外键处理-->
+    <resultMap id="omaps" type="orde">
+        <id column="po_id" property="po_id"/>
+        <result property="oper_id" column="oper_id"/>
+        <result property="supp_id" column="supp_id"/>
+        <association property="operator" column="oper_id"  javaType="operator"/>
+        <association property="suppliers" column="supp_id"  javaType="suppliers"/>
+    </resultMap>
+    <select id="oall" resultMap="omaps">
+        select * from purchase_orde p,operator_bill o,suppliers_bill s
+        where p.oper_id=o.oper_id and p.supp_id=s.supp_id
+    </select>
+    <!--商品下拉框-->
+    <select id="call" resultType="commodity">
+         select * from commodity_bill
+    </select>
+
+    <!--//采购审核通过添加商品数量-->
+    <update id="addupsotck" parameterType="order_items">
+        update stock set amount=amount+#{poi_count} where comm_id=#{comm_id}
+    </update>
+
+<!--    //采购审核通过之后出现问题修改成不通过是商品数量减少-->
+    <update id="upsotck" parameterType="order_items">
+        update stock set amount=amount-#{poi_count} where comm_id=#{comm_id}
+    </update>
+<!--批量添加-->
+    <insert id="adds"  parameterType="java.util.List">
+        insert into purchase_order_items(po_id,comm_id,poi_count,purc_price)
+       values
+       <foreach collection="list" item="Order_items" index="index" open="(" separator="," close=")">
+           #{Order_items.po_id},
+           #{Order_items.comm_id},
+           #{Order_items.poi_count},
+           #{Order_items.purc_price})
+       </foreach>
+    </insert>
+</mapper>

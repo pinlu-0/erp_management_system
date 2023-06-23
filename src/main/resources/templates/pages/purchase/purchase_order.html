@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>采购订单</title>
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon"/>
+</head>
+<style>
+    #main-nav.nav-tabs.nav-stacked > li > a {
+        padding: 10px 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #4A515B;
+        background: #E9E9E9;
+        background: -moz-linear-gradient(top, #FAFAFA 0%, #E9E9E9 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #FAFAFA), color-stop(100%, #E9E9E9));
+        background: -webkit-linear-gradient(top, #FAFAFA 0%, #E9E9E9 100%);
+        background: -o-linear-gradient(top, #FAFAFA 0%, #E9E9E9 100%);
+        background: -ms-linear-gradient(top, #FAFAFA 0%, #E9E9E9 100%);
+        background: linear-gradient(top, #FAFAFA 0%, #E9E9E9 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FAFAFA', endColorstr='#E9E9E9');
+        -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#FAFAFA', endColorstr='#E9E9E9')";
+        border: 1px solid #D5D5D5;
+        border-radius: 4px;
+    }
+
+    #main-nav.nav-tabs.nav-stacked > li > a > span {
+        color: #4A515B;
+    }
+
+    #main-nav.nav-tabs.nav-stacked > li.active > a, #main-nav.nav-tabs.nav-stacked > li > a:hover {
+        color: #FFF;
+        background: #3C4049;
+        background: -moz-linear-gradient(top, #4A515B 0%, #3C4049 100%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #4A515B), color-stop(100%, #3C4049));
+        background: -webkit-linear-gradient(top, #4A515B 0%, #3C4049 100%);
+        background: -o-linear-gradient(top, #4A515B 0%, #3C4049 100%);
+        background: -ms-linear-gradient(top, #4A515B 0%, #3C4049 100%);
+        background: linear-gradient(top, #4A515B 0%, #3C4049 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4A515B', endColorstr='#3C4049');
+        -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#4A515B', endColorstr='#3C4049')";
+        border-color: #2B2E33;
+    }
+
+    #main-nav.nav-tabs.nav-stacked > li.active > a, #main-nav.nav-tabs.nav-stacked > li > a:hover > span {
+        color: #FFF;
+    }
+
+    #main-nav.nav-tabs.nav-stacked > li {
+        margin-bottom: 4px;
+    }
+
+    /*定义二级菜单样式*/
+    .secondmenu a {
+        font-size: 10px;
+        color: #4A515B;
+        text-align: center;
+    }
+
+    .navbar-static-top {
+        background-color: #212121;
+        margin-bottom: 5px;
+    }
+
+    .navbar-brand {
+        background: no-repeat 10px 8px;
+        display: inline-block;
+        vertical-align: middle;
+        padding-left: 50px;
+        color: #fff;
+    }
+
+    /*控制箭头*/
+    .nav-header.collapsed > span.glyphicon-chevron-toggle:before {
+        content: "\e114";
+    }
+
+    .nav-header > span.glyphicon-chevron-toggle:before {
+        content: "\e113";
+    }
+
+</style>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <!--主页面-->
+        <div class="col-md-12" style="padding-left: -10px;" id="print_hidden">
+            <div class="col-md-12 panel-header">
+                <i class="glyphicon glyphicon-list-alt panel-title panel-with-icon"></i>订单采购列表
+            </div>
+            <div class="col-md-12 tablePanel" style="padding-left: 0px;padding-right: 0px">
+                <form>
+                    <table>
+                        <tbody>
+                        <tr>
+                            <td>单据编号：</td>
+                            <td><input type="text" name="order_num" id="like_order_num" style="width: 100px;"></td>
+                            <td>商品信息：</td>
+                            <td><input type="text" name="comm_name" id="like_comm_name" placeholder="名称，编号"
+                                       style="width: 100px;"></td>
+                            <td>
+                                <button type="submit" class="easyui-linkbutton l-btn" onclick="like_search()">
+                                <span class="l-btn-left">
+                                    <span class="l-btn-text icon-search l-btn-icon-left">查询</span>
+                                </span>
+                                </button>&nbsp;
+                                <a class="easyui-linkbutton l-btn">
+                                <span class="l-btn-left">
+                                    <span class="l-btn-text icon-redo l-btn-icon-left">重置</span>
+                                </span>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </form>
+                <div>
+                    <button onclick="ck()" class="l-btn l-btn-plain">
+                                <span class="l-btn-left">
+                                    <span class="l-btn-text icon-add l-btn-icon-left">增加</span>
+                                </span>
+                    </button>
+                    <a href="javascript:;" class="l-btn l-btn-plain" onclick="del_batches()">
+                                <span class="l-btn-left">
+                                    <span class="l-btn-text icon-remove l-btn-icon-left">删除</span>
+                                </span>
+                    </a>
+                </div>
+
+                <div>
+                    <table class="table table-bordered table-condensed" style="margin-bottom: 0px;">
+                        <thead>
+                        <tr>
+                            <td><input type="checkbox" id="checked_all"></td>
+                            <td style="text-align: center">操作</td>
+                            <td>供应商名称</td>
+                            <td>单据编号</td>
+                            <td>商品信息</td>
+                            <td>单据日期</td>
+                            <td>操作员</td>
+                            <td>金额总计</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!--遍历订单编号-->
+                        <tr class="datagrid-row datagrid-row-alt datagrid-row-checked datagrid-row-selected"
+                            th:each="order:${orders}">
+                            <td><input type="checkbox" class="checked_item"></td>
+                            <td style="display: none;" th:text="${order.po_id}"></td>
+                            <td style="text-align: center">
+                                <a href="#"><img th:title="查看" style="cursor: pointer;"
+                                                 src="/jquery-easyui-1.7.0/themes/icons/list.png"
+                                                 th:onclick="'javascript:queryOrderInfo(\''+${order.po_id}+'\');'"></a>
+                                <img th:title="编辑" style="cursor: pointer;"
+                                     src="/jquery-easyui-1.7.0/themes/icons/pencil.png" onclick="editOrder()">
+                                <img th:onclick="'javascript:del_byId(\''+${order.po_id}+'\');'" th:title="删除"
+                                     style="cursor: pointer;"
+                                     src="/jquery-easyui-1.7.0/themes/icons/edit_remove.png">
+                                <!--<img th:title="转采购审核" style="cursor: pointer;"-->
+                                <!--src="/jquery-easyui-1.7.0/themes/icons/redo.png" onclick="call()">-->
+                            </td>
+                            <td th:text="${order.suppliers.supp_name}">供应商</td>
+                            <td th:text="${order.order_num}">单据编号</td>
+                            <td th:text="${order.commodity.comm_name}">商品信息</td>
+                            <td th:text="${order.str_po_date}">单据日期</td>
+                            <td th:text="${order.operator.oper_name}">操作员</td>
+                            <td th:text="${order.order_items.poi_count*order.order_items.purc_price}">
+                                金额总计
+                            </td>
+
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!--分页-->
+            <div class="datagrid-pager pagination" style="bottom: 10px">
+                <table cellpadding="0" cellspacing="0" border="0">
+                    <tbody>
+                    <tr>
+                        <td>
+                            <select class="pagination-page-list">
+                                <option>10</option>
+                                <option>20</option>
+                                <option>30</option>
+                                <option>50</option>
+                            </select>
+                        </td>
+                        <td>
+                            <div class="pagination-btn-separator"></div>
+                        </td>
+                        <td>
+                            <a href="#" class="l-btn l-btn-plain l-btn-disabled l-btn-plain-disabled">
+                                <span class="l-btn-left l-btn-icon-left">
+                                    <span class="l-btn-text l-btn-empty"></span>
+                                    <sapn class="l-btn-icon pagination-first">&nbsp;</sapn>
+                                </span>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="#" class="l-btn l-btn-plain l-btn-disabled l-btn-plain-disabled">
+                                <span class="l-btn-left l-btn-icon-left">
+                                    <span class="l-btn-text l-btn-empty"></span>
+                                    <span class="l-btn-icon pagination-prev"></span>
+                                </span>
+                            </a>
+                        </td>
+                        <td>
+                            <div class=" pagination- btn-separator"></div>
+                        </td>
+                        <td>
+                            <span style="padding-left:6px;">第</span>
+                        </td>
+                        <td>
+                            <input class="pagination-num" type="text" value="1" size="2">
+                        </td>
+                        <td>
+                            <span style="padding-right:6px;">共<span>$</span>页</span>
+                        </td>
+                        <td>
+                            <div class="pagination-btn-separator"></div>
+                        </td>
+                        <td>
+                            <a href="#" class="l-btn l-btn-plain l-btn-disabled l-btn-plain-disabled">
+                                <span class="l-btn-left l-btn-icon-left">
+                                    <span class="l-btn-text l-btn-empty"></span>
+                                    <span class="l-btn-icon pagination-next"></span>
+                                </span>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="#" class="l-btn l-btn-plain l-btn-disabled l-btn-plain-disabled">
+                                <span class="l-btn-left l-btn-icon-left">
+                                    <span class="l-btn-text l-btn-empty"></span>
+                                    <span class="l-btn-icon pagination-last"></span>
+                                </span>
+                            </a>
+                        </td>
+                        <td>
+                            <div class="pagination-btn-separator"></div>
+                        </td>
+                        <td>
+                            <a href="#" class="l-btn l-btn-plain l-btn-disabled l-btn-plain-disabled">
+                                <span class="l-btn-left l-btn-icon-left">
+                                    <span class="l-btn-text l-btn-empty"></span>
+                                    <span class="l-btn-icon pagination-load"></span>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<!--增加弹出框-->
+<div id="win" class="easyui-window" collapsible="false" title="增加订单信息" closed="true"
+     style="width:850px;height:400px;padding:5px;">
+    <sapn style="display: none" id="user_Id" th:text="${session.userid}"></sapn><!--隐藏显示操作员的id-->
+    <div class="datagrid-toolbar">
+        <form method="post" id="ff">
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <!--<td>供应商：</td>
+                    <td style="padding-left: 5px;">
+                        <div>
+                            <select class="easyui-combobox suppliers" style="width:100px;">
+                                <option value="0">&#45;&#45;请选择&#45;&#45;</option>
+                                <option th:each="supplier:${suppliers}" th:value="${supplier.supp_id}"
+                                        th:text="${supplier.supp_name}"></option>
+                            </select>
+                        </div>
+                    </td>-->
+                    <td style="padding-left: 10px;">单据日期：</td>
+                    <td>
+                        <input type="text" class="easyui-datetimebox" id="bill_Date" th:text="${currentTime}"
+                               style="width: 150px">
+                    </td>
+                    <td style="padding-left: 10px">单据编号：</td>
+                    <td>
+                        <input type="text" class="easyui-validatebox d_num" data-options="required:true,validType:''">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="9">
+                        <div class="panel">
+                            <div class="datagrid-toolbar">
+                                <table>
+                                    <tbody>
+                                    <tr>
+                                        <td>
+                                            <a href="javascript:;" onclick="add_OrderInfo()" class="l-btn l-btn-plain">
+                                                                <span class="l-btn-left">
+                                                                    <span class="l-btn-text icon-add l-btn-icon-left">新增行</span>
+                                                                </span>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:;" id="deleteBtn" class="l-btn l-btn-plain">
+                                                                <span class="l-btn-left">
+                                                                    <span class="l-btn-text icon-remove l-btn-icon-left">删除行</span>
+                                                                </span>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:;" onclick="backout()" class="l-btn l-btn-plain">
+                                                                <span class="l-btn-left">
+                                                                    <span class="l-btn-text icon-undo l-btn-icon-left">撤销</span>
+                                                                </span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div>
+                                <table class="table table-bordered" id="add_OrderInfo_table">
+                                    <thead>
+                                    <tr>
+                                        <td><input type="checkbox" id="checkbox_all"></td>
+                                        <td>仓库名称</td>
+                                        <td>品名</td>
+                                        <td>供货商</td>
+                                        <td>库存</td>
+                                        <td>数量</td>
+                                        <td>单价</td>
+                                        <td>金额</td>
+                                        <td>备注</td>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <!--这里是动态添加行-->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <button type="submit" onclick="save()" style="margin-left: 350px;" class="easyui-linkbutton">Save</button>
+        </form>
+    </div>
+</div>
+<!--添加商品页面-->
+<div id="add_goods_win" class="easyui-window" collapsible="false" title="商品列表" closed="true"
+     style="width:900px;height:400px;padding:5px;">
+    <table>
+        <tbody>
+        <tr>
+            <td>类别:</td>
+            <td>
+                <input type="text">
+                <a href="javascript:;" class="l-btn l-btn-plain">
+                        <span class="l-btn-left">
+                            <span class="l-btn-text icon-search l-btn-icon-left">搜索</span>
+                        </span>
+                </a>
+            </td>
+            <td>品名:</td>
+            <td>
+                <input type="text">
+                <a href="javascript:;" class="l-btn l-btn-plain">
+                        <span class="l-btn-left">
+                            <span class="l-btn-text icon-search l-btn-icon-left">查询</span>
+                        </span>
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="datagrid-toolbar">
+        <table>
+            <tbody>
+            <tr>
+                <td>
+                    <a href="javascript:;" class="l-btn l-btn-plain">
+                            <span class="l-btn-left">
+                                <span class="l-btn-text icon-add l-btn-icon-left">增加</span>
+                            </span>
+                    </a>
+                </td>
+                <td>
+                    <div class="datagrid-btn-separator"></div>
+                </td>
+                <td>
+                    <a href="javascript:;" class="l-btn l-btn-plain">
+                            <span class="l-btn-left">
+                                <span class="l-btn-text icon-remove l-btn-icon-left">删除</span>
+                            </span>
+                    </a>
+                </td>
+                <td>
+                    <div class="datagrid-btn-separator"></div>
+                </td>
+                <td>
+                    <a href="javascript:;" class="l-btn l-btn-plain">
+                            <span class="l-btn-left">
+                                <span class="l-btn-text icon-ok l-btn-icon-left">启用</span>
+                            </span>
+                    </a>
+                </td>
+                <td>
+                    <div class="datagrid-btn-separator"></div>
+                </td>
+                <td>
+                    <a href="javascript:;" class="l-btn l-btn-plain">
+                            <span class="l-btn-left">
+                                <span class="l-btn-text icon-no l-btn-icon-left">禁用</span>
+                            </span>
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>操作</td>
+                <td>品名</td>
+                <td>型号</td>
+                <td>类别</td>
+                <td>扩展信息</td>
+                <td>单位</td>
+                <td>安全存量</td>
+                <td>零售价</td>
+                <td>最低售价</td>
+                <td>预计采购价</td>
+                <td>销售价</td>
+                <td>状态</td>
+                <td>序列号</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>
+                    <img title="编辑" src="/jquery-easyui-1.7.0/themes/icons/pencil.png" onclick="editMaterial();">
+                    <img title="删除" src="/jquery-easyui-1.7.0/themes/icons/edit_remove.png" onclick="deleteMaterial();">
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!--编辑商品信息-->
+<div id="edit_Goods_Info" class="easyui-window" collapsible="false" title="编辑商品信息" closed="true"
+     style="width:900px;height:400px;padding:5px;">
+    <form>
+        <div id="tt" class="easyui-tabs tabs-container">
+            <div></div>
+        </div>
+    </form>
+</div>
+<!--查看订单详细信息的弹出框-->
+<div id="queryOrderInfo" class="easyui-window" collapsible="false" title="查看订单信息" closed="true"
+     style="width:1000px;height:400px;padding:5px;">
+    <table>
+        <tbody>
+        <tr>
+            <td style="width: 60px;">供应商:</td>
+            <td class="backShow_supp" style="padding: 5px;width: 120px;"></td>
+            <td style="width: 80px;">单据日期：</td>
+            <td style="padding: 5px;width: 130px;" class="backShow_po_date"></td>
+            <td style="width:80px;">单据编号：</td>
+            <td style="padding:5px;width:140px;" class="backShow_orderNum"></td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="datagrid-toolbar">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <td>仓库名称</td>
+                <td>品名</td>
+                <td>库存</td><!--库存即库存数量-->
+                <td>单位</td>
+                <td>数量</td><!--该数量是本次进货的数量-->
+                <td>单价</td>
+                <td>金额</td>
+                <td>备注</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="hourse_name"></td><!--仓库名-->
+                <td class="comm_name"></td><!--商品名称-->
+                <td class="stock_count"></td><!--库存-->
+                <td class="unit"></td><!--单位-->
+                <td class="come_in_count"></td><!--进货数量-->
+                <td class="price"></td><!--单价-->
+                <td class="sum"></td><!--总金额-->
+                <td class="remark"></td><!--备注-->
+            </tr>
+            </tbody>
+        </table>
+        <td>实付金额：<input readonly="readonly" class="shifu"></td>
+        <div style="margin-top: 150px;"></div>
+        <div>
+            <input type="button" class="btn btn-default print_btn" value="打印" style="margin-left: 450px;"  onclick="my_print()">
+        </div>
+    </div>
+
+</div>
+</body>
+<!--引用的CSS和JS-->
+<link href="http://cdn.bootcss.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+<script src="http://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+<script src="http://cdn.bootcss.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/jquery-easyui-1.7.0/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="/jquery-easyui-1.7.0/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="/jquery-easyui-1.7.0/demo/demo.css">
+<script type="text/javascript" src="/jquery-easyui-1.7.0/jquery.easyui.min.js"></script>
+<!--JS代码-->
+<script type="text/javascript">
+    //打印订单详细信息
+    function my_print() {
+        $("#print_hidden").attr("style","display:none");//隐藏该页面下面的页面
+        $(".print_btn").hide();//隐藏打印按钮
+        window.print();//执行打印
+        $(".print_btn").show();//显示打印按钮
+        $("#print_hidden").attr("style","display:block;");//显示该页面下面的页面
+    }
+    //查看订单的详细信息的弹出框
+    function queryOrderInfo(ids) {
+        $("#queryOrderInfo").window('open');//弹出窗体
+        //弹出时发送请求 查询当前行的数据
+        $.ajax({
+            url: '/purchase/queryOrderById',
+            type: 'POST',
+            data: {"id": ids},
+            success: function (data) {
+                $(".hourse_name").text(data.depot.depot_name);
+                $(".backShow_supp").text(data.suppliers.supp_name);
+                $(".backShow_po_date").text(data.str_po_date);
+                $(".backShow_orderNum").text(data.order_num);
+                $(".comm_name").text(data.commodity.comm_name);
+                $(".come_in_count").text(data.order_items.poi_count);
+                $(".unit").text(data.commodity.comm_unit);
+                $(".price").text(data.order_items.purc_price);
+                $(".sum").text(data.order_items.poi_count*data.order_items.purc_price);
+                $(".remark").text(data.remark);
+                $(".stock_count").text(data.stock.amount);
+                $(".shifu").val(data.order_items.poi_count*data.order_items.purc_price);
+            }
+        });
+    }
+
+    //修改订单的详细信息的弹出框
+    function editOrder() {
+        $("#queryOrderInfo").window('open');//弹出窗体
+    }
+
+    /*增加窗口的弹出事件*/
+    function ck() {
+        $("#win").window('open');//弹出窗体
+        $.ajax({
+            url: "/purchase/wareHousing",
+            type: "POST",
+            success: function (data) {
+                var time = data.extend.currentTime;
+                $("#bill_Date").datebox('setValue', time);
+                $(".d_num").val(data.extend.sd);
+            }
+        });
+    };
+    //关闭弹出框之前 需要操的的
+    $(document).ready(function () {
+        $('#win').window({
+            onBeforeClose: function () {
+                backout();
+            }
+        });
+    });
+
+    /*
+    全选全不选
+    */
+    //选择每一个 是否选中全部
+    $(document).on("click", ".checked_item", function () {
+        $("#checked_all").prop("checked", $(".checked_item:checked").length == $(".checked_item").length ? true : false);
+    });
+    //选中全部时 选中所有项
+    $(document).on("click", "#checked_all", function () {
+        $(".checked_item").prop("checked", $("#checked_all").prop("checked"));
+    });
+
+    //动态添加行
+    function add_OrderInfo() {
+        //点击添加行 动态添加行
+        var checked_box = $("<td><input type='checkbox' class='checkbox_one'></td>");//多选框
+        var warehouse_name = $("<td></td>");//仓库名称下拉框
+        var select = $("<select style='width: 100px;' class='warehouse_name'></select>");
+        var trade_name = $("<td><select style='width: 100px;' class='trade_name'></select></td>");//商品名下拉框
+        var supp_name = $("<td><input value='' readonly='readonly' style='width: 100px;'></td>");//供货商
+        var repertory = $("<td><input style='width: 100px;' readonly='readonly'></td>");//库存
+        var count = $("<td><input class='My_Count' style='width: 50px;'></td>");//数量
+        var price = $("<td><input class='My_Price' style='width: 50px;'></td>");//单价
+        var sum = $("<td><input class='My_Sum' style='width: 50px;'></td>");//金额
+        var remark = $("<td><input style='width: 50px;'></td>");//备注
+        $("<tr class='trade_tr'></tr>").append(checked_box).append(warehouse_name).append(trade_name).append(supp_name)
+            .append(repertory).append(count).append(price).append(sum).append(remark).appendTo("#add_OrderInfo_table tbody");
+        //查询仓库
+        $.ajax({
+            url: '/purchase/depot',
+            type: 'POST',
+            async: true,
+            success: function (data) {
+                var depot_id = data.extend.depots[0].depot_id;
+                $.each(data.extend.depots, function (index, item) {
+                    //显示仓库名
+                    var warehouse_content = item.depot_name;
+                    var warehouse_id = item.depot_id;
+                    select.append("<option value='" + warehouse_id + "' >" + warehouse_content + "</option>");
+                });
+                warehouse_name.append(select);
+                $.ajax({
+                    url: '/purchase/goods',
+                    type: 'POST',
+                    data: {"depot_id": depot_id},
+                    success: function (data) {
+                        var a = select.parent().next().find("select").empty();
+                        var goods_id = data.extend.allGoods[0].comm_id;
+                        $.each(data.extend.allGoods, function (index, item) {
+                            //给商品下拉框赋值
+                            var goods_Id = item.comm_id;
+                            var goods_Name = item.comm_name;
+                            var opt = $("<option value='" + goods_Id + "' >" + goods_Name + "</option>")
+                            a.append(opt);
+                        });
+                        $.ajax({
+                            url: '/purchase/goodsInfo',
+                            type: 'POST',
+                            data: {"goods_id": goods_id},
+                            success: function (data) {
+                                var that = a;
+                                var amount = data.extend.goodsInfo[0].amount;//库存数量
+                                var count = data.extend.goodsInfo[0].amount;//显示可以修改的数量  只起现实作用 无实际用处
+                                var price = data.extend.goodsInfo[0].commodity.purchase_price;//单价
+                                var supp_id = data.extend.goodsInfo[0].suppliers.supp_id;//供货商
+                                var supp_name = data.extend.goodsInfo[0].suppliers.supp_name;//供货商名称
+                                // var money = data.extend.goodsInfo[0].money;
+                                var money = count * price;
+                                var remark = data.extend.goodsInfo[0].depot.depot_remark;
+                                //获取文本框并赋值
+                                that.parent().parent().children("td:eq(3)").children('input').val(supp_name);
+                                that.parent().parent().children("td:eq(3)").children('input').attr("value",supp_id);
+                                that.parent().parent().children("td:eq(4)").children('input').val(amount);
+                                that.parent().parent().children("td:eq(5)").children('input').val(count);
+                                that.parent().parent().children("td:eq(6)").children('input').val(price);
+                                that.parent().parent().children("td:eq(7)").children('input').val(money);
+                                that.parent().parent().children("td:eq(8)").children('input').val(remark);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    //仓库下拉框改变事件
+    $(document).on("change", ".warehouse_name", function () {
+        //创建商品名的select
+        var a = $(this).parent().next().find("select").empty();
+        //获取下拉框id值
+        var depot_id = $(this).children('option:selected').val();
+        $.ajax({
+            url: '/purchase/goods',
+            type: 'POST',
+            data: {"depot_id": depot_id},
+            success: function (data) {
+                var goods_id = data.extend.allGoods[0].comm_id;
+                $.each(data.extend.allGoods, function (index, item) {
+                    //给商品下拉框赋值
+                    var goods_Id = item.comm_id;
+                    var goods_Name = item.comm_name;
+                    var opt = $("<option value='" + goods_Id + "' >" + goods_Name + "</option>")
+                    a.append(opt);
+                });
+                $.ajax({
+                    url: '/purchase/goodsInfo',
+                    type: 'POST',
+                    data: {"goods_id": goods_id},
+                    success: function (data) {
+                        console.log("-==="+data);
+                        var that = a;
+                        var amount = data.extend.goodsInfo[0].amount;//库存数量
+                        var count = data.extend.goodsInfo[0].amount;//显示可以修改的数量  只起现实作用 无实际用处
+                        var price = data.extend.goodsInfo[0].commodity.purchase_price;//单价
+                        // var money = data.extend.goodsInfo[0].money;
+                        var money = count * price;
+                        var remark = data.extend.goodsInfo[0].depot.depot_remark;
+                        //获取文本框并赋值
+                        // that.parent().parent().children("td:eq(3)").children('input').val(supp_name);
+                        that.parent().parent().children("td:eq(4)").children('input').val(amount);
+                        that.parent().parent().children("td:eq(5)").children('input').val(count);
+                        that.parent().parent().children("td:eq(6)").children('input').val(price);
+                        that.parent().parent().children("td:eq(7)").children('input').val(money);
+                        that.parent().parent().children("td:eq(8)").children('input').val(remark);
+                    }
+                });
+            }
+        });
+    });
+    //商品下拉框改变 获取相应的值
+    $(document).on("change",".trade_name", function () {
+        var goods_id = $(this).find('option:selected').val();
+        var that = $(this);
+        $.ajax({
+            url: '/purchase/goodsInfo',
+            type: 'POST',
+            data: {"goods_id": goods_id},
+            success: function (data) {
+                console.log(data);
+                var amount = data.extend.goodsInfo[0].amount;//库存数量
+                var count = data.extend.goodsInfo[0].amount;//显示可以修改的数量  只起现实作用 无实际用处
+                var price = data.extend.goodsInfo[0].commodity.purchase_price;//单价
+                var supp_name = data.extend.goodsInfo[0].suppliers.supp_name;//供货商名称
+                var supp_id = data.extend.goodsInfo[0].suppliers.supp_id;//供货商id
+                var money = count * price ;
+                var remark = data.extend.goodsInfo[0].depot.depot_remark;
+                //获取文本框并赋值
+                that.parent().parent().children("td:eq(3)").children('input').val(supp_name);
+                that.parent().parent().children("td:eq(3)").children('input').attr("value",supp_id);
+                that.parent().parent().children("td:eq(4)").children('input').val(amount);
+                that.parent().parent().children("td:eq(5)").children('input').val(count);
+                that.parent().parent().children("td:eq(6)").children('input').val(price);
+                that.parent().parent().children("td:eq(7)").children('input').val(money);
+                that.parent().parent().children("td:eq(8)").children('input').val(remark);
+            }
+        });
+    })
+
+    //撤销
+    function backout() {
+        $("#add_OrderInfo_table tbody").html('');//清空tbody中的所有tr
+    }
+
+    /*
+        删除行
+    */
+    //选择每一个 是否选中全部
+    $(document).on("click", ".checkbox_one", function () {
+        $("#checkbox_all").prop("checked", $(".checkbox_one:checked").length == $(".checkbox_one").length ? true : false);
+    });
+    //选中全部时 选中所有项
+    $(document).on("click", "#checkbox_all", function () {
+        $(".checkbox_one").prop("checked", $("#checkbox_all").prop("checked"));
+    });
+    //删除行
+    $("#deleteBtn").on("click", function () {
+        if ($(".checkbox_one:checked").length == 0) {
+            $.messager.alert('错误提示', '没有选中任何选项');
+        }
+        $(".checkbox_one:checked").each(function () {
+            $(this).parent().parent()[0].remove();
+        })
+    });
+    //数量、单价变 金额相对应的发生变化
+    $(document).on("keyup",".My_Count",function () {
+        var a = $(this).val();
+        var b = $(".My_Price").val();
+        var c = a * b ;
+        $(".My_Sum").val(c);
+    });
+    $(document).on("keyup",".My_Price",function () {
+        var a = $(".My_Count").val();
+        var b = $(this).val();
+        var c = a * b ;
+        $(".My_Sum").val(c);
+    })
+    //点击save触发事件
+    function save() {
+        var obj = new Array();//声明一个数组 用来存放每行数据
+        $(".trade_tr").each(function () {
+            var warehouse_name = $(this).children('td:eq(1)').find("select").val();//仓库名称
+            var trade_name = $(this).children('td:eq(2)').find("select").val();//商品名
+            var suppliers = $(this).children("td:eq(3)").find("input").attr("value");//金额
+            var repertory = $(this).children("td:eq(4)").find("input").val();//库存
+            var count = $(this).children("td:eq(5)").find('input').val();//库存
+            var price = $(this).children("td:eq(6)").find("input").val();//单价
+            var sum = $(this).children("td:eq(7)").find("input").val();//金额
+            var remark = $(this).children("td:eq(8)").find("input").val();//备注
+            var bill_Date = $("#bill_Date").val();//制单日期
+            var order_num = $(".d_num ").val();//单据编号
+            var oper_id = $("#user_Id").text();//获取操作员的id
+
+            var order_obj = {};//声明一个对象用来存放遍历出来的一行数据
+            order_obj.warehouse_name = warehouse_name;
+            order_obj.trade_name = trade_name;
+            order_obj.repertory = repertory;
+            order_obj.count = count;
+            order_obj.price = price;
+            order_obj.sum = sum;
+            order_obj.remark = remark;
+            order_obj.suppliers = suppliers;//供货商
+            order_obj.bill_Date = bill_Date;//制单日期
+            order_obj.order_num = order_num;//单据日期
+            order_obj.oper_id = oper_id;//制单人
+            obj.push(order_obj);//把对象放到数组中
+            console.log(order_obj);
+        });
+
+        //检查提交
+        // if (suppliers == 0) {
+        //     $.messager.alert("错误提示", "请选择供应商");
+        //     event.preventDefault();
+        //     return false;
+        // }
+        //点击Save 添加订单信息
+        $.ajax({
+            url: "/purchase/add_order",
+            type: "POST",
+            traditional: true,
+            async: false,
+            data: {list: window.JSON.stringify(obj)},
+            success: function (data) {
+                if (data.extend.count > 0) {
+                    $.messager.alert("提示", "正在添加.....");
+                } else {
+                    $.messager.alert("提示", "添加失败");
+                }
+            }
+        });
+
+    }
+
+    //增加商品
+    function add_Goods() {
+        $("#add_goods_win").window('open');//弹出窗体
+    };
+
+    //编辑商品信息
+    function editMaterial() {
+        $("#edit_Goods_Info").window('open');//弹出窗体
+    }
+
+    //批量删除
+    function del_batches() {
+        if ($(".checked_item:checked").length == 0) {
+            $.messager.alert('错误提示', '没有选中任何选项');
+        }
+        var ids = "";
+        $.each($(".checked_item:checked"), function () {
+            ids += $(this).parents("tr").find("td:eq(1)").text() + "-";//获取删除的编号
+        })
+        //分割掉拼接字符串的最后一个 -
+        ids = ids.substring(0, ids.length - 1);
+        $.ajax({
+            url: '/purchase/del_bat',
+            type: 'POST',
+            data: {"ids": ids},
+            success: function () {
+
+            }
+        });
+    }
+
+    //单个删除
+    function del_byId(del_id) {
+        $.ajax({
+            url: '/purchase/del_bat',
+            type: 'POST',
+            data: {"ids": del_id},
+            success: function () {
+                window.location.href = "/purchase/query_order";
+            }
+        });
+    }
+
+    //模糊查询订单
+    function like_search() {
+        $.ajax({
+            url: '/purchase/like_search',
+            type: 'POST',
+            data: $('form').serialize(),
+            success: function (data) {
+
+            }
+        });
+    }
+
+    //处理Easyui-datebox格式
+    function myformatter(date) {
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        var d = date.getDate();
+        return y + '-' + (m < 10 ? ('0' + m) : m) + '-' + (d < 10 ? ('0' + d) : d);
+    }
+
+    function myparser(s) {
+        if (!s) return new Date();
+        var ss = (s.split('-'));
+        var y = parseInt(ss[0], 10);
+        var m = parseInt(ss[1], 10);
+        var d = parseInt(ss[2], 10);
+        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+            return new Date(y, m - 1, d);
+        } else {
+            return new Date();
+        }
+    }
+
+    //单个删除
+</script>
+</html>

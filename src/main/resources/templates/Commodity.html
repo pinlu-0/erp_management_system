@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://wwww.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>商品信息</title>
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
+    <script src="/bootstrap-3.3.7-dist/js/jquery-3.1.1.js"></script>
+    <script src="/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css" media="all">
+</head>
+<style>
+    .form-control {
+        height: 30px;
+        width: 220px;
+    }
+
+    th {
+        text-align: center;
+    }
+
+</style>
+
+<body>
+
+
+<div class="container  table table-hover" style="background-color: #ffffff;padding: 50px">
+    <!--条件查询-->
+    <form action="/Commodity/all" method="get">
+        <label>商品名称：</label>
+        <input type="text" name="comm_name" th:value="${cd.comm_name}" style="height: 30px">
+        <label>拼音编码：</label>
+        <input type="text" name="comm_spell_code" th:value="${cd.comm_spell_code}" style="height: 30px">
+        <label>产地：</label>
+        <input type="text" name="comm_producing_area" th:value="${cd.comm_producing_area}" style="height: 30px">
+        <label>类别：</label>
+        <input type="text" name="comm_sort" th:value="${cd.comm_sort}" style="height: 30px">
+        <button type="submit" class="btn btn-default">查询</button>
+    </form>
+    <button class="btn btn-primary" onclick="batchDel()">批量删除</button>
+    <button class="btn btn-primary" onclick="add()">新增</button>
+    <div class="table-responsive">
+        <table class="table table-hover " border="1px" cellpadding="1px" cellspacing="1px" style="text-align: center">
+            <thead>
+            <th><input type="checkbox" id="all">全选</th>
+            <th>货物编码</th>
+            <th>条形码</th>
+            <th>商品名</th>
+            <th>拼音编码</th>
+            <th>商品规格</th>
+            <th>单位</th>
+            <th>商品产地</th>
+            <th>类别</th>
+            <th>进货价</th>
+            <th>销售价1</th>
+            <th>销售价2</th>
+            <th>最低销售价</th>
+            <th>操作</th>
+            </thead>
+            <tbody class=".table-striped .table-bordered">
+            <!-- class="active,success,info,warning,danger"代表不同的颜色-->
+            <tr th:each="c:${comm}">
+                <td>
+                    <input type="checkbox" name="id[]" th:value="${c.comm_id}">
+                </td>
+                <td th:text="${c.comm_id}"></td>
+                <td th:text="${c.comm_bar_code}"></td>
+                <td th:text="${c.comm_name}"></td>
+                <td th:text="${c.comm_spell_code}"></td>
+                <td th:text="${c.comm_standard}"></td>
+                <td th:text="${c.comm_unit}"></td>
+                <td th:text="${c.comm_producing_area}"></td>
+                <td th:text="${c.comm_sort}"></td>
+                <td th:text="${c.purchase_price}"></td>
+                <td th:text="${c.sale_price1}"></td>
+                <td th:text="${c.sale_price2}"></td>
+                <td th:text="${c.lowest_sale_price}"></td>
+                <td>
+
+                    <button id="goEdit" class="btn btn-info" th:onclick="'javascript:edit('+${c.comm_id}+');'">编辑</button>
+                    <button id="del" class="btn btn-danger" th:onclick="'javascript:del('+${c.comm_id}+');'">删除</button>
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- 新增信息的模态框 -->
+<div class="modal fade" id="addEdit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalTitle">模态框（Modal）标题</h4>
+            </div>
+            <form id="teacherForm" class="form-horizontal" action="/Commodity/add" method="post"
+                  enctype="multipart/form-data">
+                <input id="comm_id" name="comm_id" type="hidden">
+                <div class="form-group">
+                    <label for="comm_bar_code" class="col-sm-2 control-label">商品条形码：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="comm_bar_code" name="comm_bar_code">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="comm_name" class="col-sm-2 control-label">商品名称：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="comm_name" name="comm_name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="comm_spell_code" class="col-sm-2 control-label">拼音编码：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="comm_spell_code" name="comm_spell_code">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="comm_standard" class="col-sm-2 control-label">商品规格：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="comm_standard" name="comm_standard">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="comm_unit" class="col-sm-2 control-label">单位：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="comm_unit" name="comm_unit">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="comm_producing_area" class="col-sm-2 control-label">产地：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="comm_producing_area" name="comm_producing_area">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="comm_sort" class="col-sm-2 control-label">类别：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="comm_sort" name="comm_sort">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="purchase_price" class="col-sm-2 control-label">进货价：</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" id="purchase_price" name="purchase_price">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="sale_price1" class="col-sm-2 control-label">销售价1：</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" id="sale_price1" name="sale_price1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="sale_price2" class="col-sm-2 control-label">销售价2：</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" id="sale_price2" name="sale_price2">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="lowest_sale_price" class="col-sm-2 control-label">最低销售价：</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" id="lowest_sale_price" name="lowest_sale_price">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary">提交</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+</body>
+<script src="/resources/layui/layui.js"></script>
+<script>
+    layui.use(['layer', 'element', 'jquery'], function () {
+        var $ = layer = layui.layer
+            , element = layui.element,
+            jquery = layui.jquery;
+    })
+
+    // 进入编辑页面前的请求,返回json
+    function edit(id) {
+        $.ajax({
+            async: true,
+            type: "POST",
+            url: "/Commodity/selectByid?id=" + id,
+            success: addData,
+            error: function (msg) {
+                alert(msg + "错误数据");
+            },
+            dataType: "json"
+        });
+    }
+
+    // 查询成功后向模态框插入数据并开启模态框。data是返回的JSON对象
+    function addData(data) {
+        $("#comm_id").val(data.comm_id);
+        $("#comm_bar_code").val(data.comm_bar_code);
+        $("#comm_name").val(data.comm_name);
+        $("#comm_spell_code").val(data.comm_spell_code);
+        $("#comm_standard").val(data.comm_standard);
+        $("#comm_unit").val(data.comm_unit);
+        $("#comm_producing_area").val(data.comm_producing_area);
+        $("#comm_sort").val(data.comm_sort);
+        $("#purchase_price").val(data.purchase_price);
+        $("#sale_price1").val(data.sale_price1);
+        $("#sale_price2").val(data.sale_price2);
+        $("#lowest_sale_price").val(data.lowest_sale_price);
+        $("#ModalTitle").text("修改商品信息");
+        $("#teacherForm").attr("action", "/Commodity/upd");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+
+    //显示新增模态框
+    function add() {
+        $("#comm_id").val("");
+        $("#comm_bar_code").val("");
+        $("#comm_name").val("");
+        $("#comm_spell_code").val("");
+        $("#comm_standard").val("");
+        $("#comm_unit").val("");
+        $("#comm_producing_area").val("");
+        $("#comm_sort").val("");
+        $("#purchase_price").val("");
+        $("#sale_price1").val("");
+        $("#sale_price2").val("");
+        $("#lowest_sale_price").val("");
+        $("#ModalTitle").text("新增商品信息");
+        $("#teacherForm").attr("action", "/Commodity/add");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+
+    // 删除请求
+    function del(id) {
+        var r = confirm("确定删除吗");
+        if (r == true) {
+            $.ajax({
+                async: true,
+                type: "GET",
+                url: "/Commodity/del?id=" + id,
+                dataType: "text",
+                success: function () {
+                    window.location.href = "/Commodity/all";
+                },
+                error: function (msg) {
+                    alert(msg + "错误数据");
+                }
+            });
+        }
+    }
+
+    //全选操作,选中属性对应“checked”和“selected”通常用prop设定
+    $("#all").click(function () {
+        if (this.checked) {
+            $(":checkbox[name='id[]']").prop("checked", true);
+        } else {
+            $(":checkbox[name='id[]']").prop("checked", false);
+        }
+    });
+    //单选操作
+    $(":checkbox[name='id[]']").click(function () {
+        //列表总数量
+        num = $(":checkbox[name='id[]']").length;
+        //选中的数量
+        nn = $(":checkbox[name='id[]']:checked").length;
+        //设定全选框
+        if (num == nn) {
+            $("#all").prop("checked", true);
+        } else {
+            $("#all").prop("checked", false);
+        }
+    });
+
+    function batchDel() {
+        var ids = new Array();
+        num = $(":checkbox[name='id[]']:checked").length;
+        if (num == 0) {
+            alert('必须选中一行才可以删除！');
+
+        } else {
+            $.each($(":checkbox[name='id[]']:checked"), function (i, v) {
+                ids[i] = this.value;
+            });
+            var r = confirm("确定删除吗");
+            if (r == true) {
+                $.ajax({
+                    url: "/Commodity/batchDel",
+                    type: "POST",
+                    data: {ids: ids},
+                    dataType: "text",
+                    success: function (result) {
+                        alert("删除成功")
+                        location.href = "/Commodity/all";
+                    },
+                    error: function (msg) {
+                        alert("删除失败")
+                    }
+                });
+
+            }
+        }
+
+
+    }
+</script>
+</html>
+
+

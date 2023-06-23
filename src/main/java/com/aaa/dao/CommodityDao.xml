@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.CommodityDao">
+ <select id="all" parameterType="commodity" resultType="commodity">
+    select * from commodity_bill
+     <where>
+         <if test="comm_name != null and comm_name != ''">
+             comm_name like  concat('%',concat(#{comm_name},'%'))
+         </if>
+         <if test="comm_spell_code != null and comm_spell_code != ''">
+             and comm_spell_code like  concat('%',concat(#{comm_spell_code},'%'))
+         </if>
+         <if test="comm_producing_area!=null and comm_producing_area!=''">
+            and comm_producing_area like concat('%',concat(#{comm_producing_area},'%'))
+         </if>
+         <if test="comm_sort!=null and comm_sort!=''">
+             and comm_sort like concat('%',concat(#{comm_sort},'%'))
+         </if>
+     </where>
+     order by comm_id
+ </select>
+  <insert id="add" parameterType="commodity">
+      insert into commodity_bill(comm_bar_code,comm_name,comm_spell_code,comm_standard,comm_unit,comm_producing_area,comm_sort,
+      purchase_price,sale_price1,sale_price2,lowest_sale_price)
+      values(#{comm_bar_code},#{comm_name},#{comm_spell_code},
+      #{comm_standard},#{comm_unit},#{comm_producing_area},#{comm_sort},#{purchase_price},#{sale_price1},#{sale_price2},#{lowest_sale_price})
+  </insert>
+    <delete id="delete" parameterType="Integer">
+        delete from commodity_bill where comm_id=#{comm_id}
+    </delete>
+    <select id="selectbyid" parameterType="Integer" resultType="commodity">
+         select * from commodity_bill where comm_id=#{comm_id}
+    </select>
+    <update id="upd" parameterType="commodity">
+        update commodity_bill
+        <set>
+            comm_bar_code=#{comm_bar_code},
+            comm_name=#{comm_name},
+            comm_spell_code=#{comm_spell_code},
+            comm_standard=#{comm_standard},
+            comm_unit=#{comm_unit},
+            comm_producing_area=#{comm_producing_area},
+            comm_sort=#{comm_sort},
+            purchase_price=#{purchase_price},
+            sale_price1=#{sale_price1},
+            sale_price2=#{sale_price2},
+            lowest_sale_price=#{lowest_sale_price}
+        </set>
+        where comm_id=#{comm_id}
+    </update>
+    <delete id="batchDel">
+        delete from commodity_bill where comm_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

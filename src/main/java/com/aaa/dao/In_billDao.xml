@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.In_billDao">
+    <!--外键处理-->
+    <resultMap id="omap" type="in_bill">
+        <id column="pib_id" property="pib_id"/>
+        <result property="oper_id" column="oper_id"/>
+        <result property="supp_id" column="supp_id"/>
+        <association property="operator" column="oper_id"  javaType="operator"/>
+        <association property="suppliers" column="supp_id"  javaType="suppliers"/>
+    </resultMap>
+    <!--条件查询-->
+    <select id="all" parameterType="in_bill" resultMap="omap">
+        select * from purchase_in_bill p,operator_bill o,suppliers_bill s
+        <where>
+            p.oper_id=o.oper_id and p.supp_id=s.supp_id
+            <if test="supp_id != null and supp_id != 0">
+                and p.supp_id=#{supp_id}
+            </if>
+            <if test="oper_id != null and oper_id != 0">
+                and p.oper_id=#{oper_id}
+            </if>
+            <if test="cbill != null and cbill != ''">
+                and cbill like  concat('%',concat(#{cbill},'%'))
+            </if>
+            <if test="Inspector != null and Inspector != ''">
+                and Inspector like  concat('%',concat(#{Inspector},'%'))
+            </if>
+            <if test="keeper != null and keeper != ''">
+                and keeper like  concat('%',concat(#{keeper},'%'))
+            </if>
+        </where>
+
+        order by pib_id
+    </select>
+    <resultMap id="omaps" type="in_bill">
+        <id column="pib_id" property="pib_id"/>
+        <result property="oper_id" column="oper_id"/>
+        <result property="supp_id" column="supp_id"/>
+        <collection property="operator" column="oper_id"  ofType="operator"/>
+        <collection property="suppliers" column="supp_id"  ofType="suppliers"/>
+    </resultMap>
+    <select id="alls" parameterType="Integer" resultMap="omaps">
+        select * from purchase_in_bill p,operator_bill o,suppliers_bill s where
+           p.oper_id=o.oper_id and p.supp_id=s.supp_id and pib_id=#{pib_id}
+    </select>
+
+    <!--添加-->
+    <insert id="add" parameterType="in_bill">
+      insert into purchase_in_bill(supp_id,pib_date,oper_id,cbill,Inspector,keeper)
+       values(#{supp_id},#{pib_date},#{oper_id},#{cbill},#{Inspector},#{keeper})
+  </insert>
+    <!--删除-->
+    <delete id="del" parameterType="Integer">
+        delete from purchase_in_bill where pib_id=#{pib_id}
+    </delete>
+    <!--修改-->
+    <select id="selectbyid" parameterType="Integer" resultType="in_bill">
+         select *,DATE_FORMAT(pib_date,"%Y-%m-%d")
+         AS pib_dates from purchase_in_bill where pib_id=#{pib_id}
+    </select>
+    <update id="upd" parameterType="in_bill">
+        update purchase_in_bill
+        <set>
+            supp_id=#{supp_id},
+            pib_date=#{pib_date},
+            oper_id=#{oper_id},
+            cbill=#{cbill},
+            Inspector=#{Inspector},
+            keeper=#{keeper}
+        </set>
+        where pib_id=#{pib_id}
+    </update>
+    <!--多选删除-->
+    <delete id="batchDel">
+        delete from purchase_in_bill where pib_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <!--业务员下拉框-->
+    <select id="opall" resultType="operator">
+         select * from operator_bill
+    </select>
+    <!--供货商下拉框-->
+    <select id="suall" resultType="suppliers">
+         select * from suppliers_bill
+    </select>
+</mapper>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://wwww.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>进货订单明细</title>
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
+    <script src="/bootstrap-3.3.7-dist/js/jquery-3.1.1.js"></script>
+    <script src="/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+    <!--   引入下拉列表框-->
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap-select.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/bootstrap-3.3.7-dist/js/bootstrap-select.min.js"></script>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css" media="all">
+</head>
+<style>
+    .form-control{
+        height: 30px;
+        width: 220px;
+
+    }
+    th{
+        text-align: center;
+    }
+
+</style>
+<body>
+
+<div class="container  table table-hover" style="background-color: #ffffff;padding: 50px">
+
+    <!--条件查询-->
+    <form action="/In_items/all" method="get">
+        <label>商品名称</label>
+        <select  class="selectpicker" name="comm_id">
+            <option th:value="0">请选择</option>
+            <option th:each="f:${comm}"
+                    th:value="${f.comm_id}"
+                    th:text="${f.comm_name}"
+                    th:selected="${f.comm_id==in_item.comm_id}"></option>
+        </select>
+
+            <label>存放仓库：</label>
+                <select  class="selectpicker" name="depot_id">
+                    <option th:value="0">请选择</option>
+                    <option th:each="o:${depots}"
+                            th:value="${o.depot_id}"
+                            th:text="${o.depot_name}"
+                            th:selected="${o.depot_id==in_item.depot_id}"></option>
+                </select>
+        <label>审核状态:</label>
+        <select  class="selectpicker" name="pii_state">
+            <option th:value="3">请选择</option>
+            <option th:value="0" th:selected="${in_item.pii_state} eq 0"
+            >待审核</option>
+            <option th:value="1"  th:selected="${in_item.pii_state} eq 1"
+            >审核通过</option>
+            <option th:value="2"  th:selected="${in_item.pii_state} eq 2"
+            >审核不通过</option>
+        </select>
+        <button type="submit" class="btn btn-default">查询</button>
+    </form>
+    <button class="btn btn-primary" onclick="batchDel()">批量删除</button>
+    <button class="btn btn-primary" onclick="add()">新增</button>
+    <div class="table-responsive">
+        <table class="table table-hover " border="1px" cellpadding="1px" cellspacing="1px" >
+            <thead style="text-align: center">
+            <th><input type="checkbox" id="all">全选</th>
+            <th>存放仓库</th>
+            <th>商品名称</th>
+            <th>订货数量</th>
+            <th>进价</th>
+            <th>总额</th>
+            <th>供货商</th>
+            <th>业务员</th>
+            <th>进货日期</th>
+            <th>制单人</th>
+            <th>验收员</th>
+            <th>保管员</th>
+            <th>审核</th>
+            <th>操作</th>
+            </thead>
+            <tbody class=".table-striped .table-bordered" >
+            <!-- class="active,success,info,warning,danger"代表不同的颜色-->
+                <tr th:each="s:${in_items}" style="text-align: center">
+                    <td>
+                        <input type="checkbox" name="id[]" th:value="${s.pii_id}">
+                    </td>
+                    <td th:text="${s.depot.depot_name}"></td>
+                    <td th:text="${s.commodity.comm_name}"></td>
+                    <td th:text="${s.pii_amount}"></td>
+                    <td th:text="${s.purc_price}"></td>
+                    <td th:text="${s.purc_price*s.pii_amount}"></td>
+                    <td th:text="${s.in_bill.suppliers.supp_name}"></td>
+                    <td th:text="${s.in_bill.operator.oper_name}"></td>
+                    <td th:text="${s.in_bill.pib_date}"></td>
+                    <td th:text="${s.in_bill.cbill}"></td>
+                    <td th:text="${s.in_bill.inspector}"></td>
+                    <td th:text="${s.in_bill.keeper}"></td>
+                    <td>
+                        <p  th:if="${s.pii_state} eq 0"style="color:black;font-size: 18px">待审核</p>
+                        <p  th:if="${s.pii_state} eq 1" style="color:green;font-size: 18px">审核通过</p>
+                        <p  th:if="${s.pii_state} eq 2" style="color:red;font-size: 18px">审核不通过</p>
+                    </td>
+                    <td>
+                        <button id="goEdits" class="btn btn-dark" th:onclick="'javascript:edits('+${s.pii_id}+');'">审核</button>
+                        <button id="goEdit" class="btn btn-info" th:onclick="'javascript:edit('+${s.pii_id}+');'">编辑</button>
+                        <button id="del" class="btn btn-danger" th:onclick="'javascript:del('+${s.pii_id}+');'">删除</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- 新增信息的模态框 -->
+<div class="modal fade" id="addEdit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalTitle">模态框（Modal）标题</h4>
+            </div>
+            <form id="teacherForm" class="form-horizontal" action="/In_items/add" method="post" enctype="multipart/form-data">
+                <input id="pii_id" name="pii_id" type="hidden" >
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">订单供应商：</label>
+                    <div class="col-sm-10">
+                        <select  class="selectpicker" name="pib_id" id="pib_id" >
+                            <option th:value="0">请选择</option>
+                            <option th:each="o:${In_bill}"
+                                    th:value="${o.pib_id}"
+                                    th:text="${o.suppliers.supp_name}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">商品名称：</label>
+                    <div class="col-sm-10">
+                        <select  class="selectpicker" name="comm_id" id="comm_id" >
+                            <option th:value="0">请选择</option>
+                            <option th:each="o:${comm}"
+                                    th:value="${o.comm_id}"
+                                    th:text="${o.comm_name}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="pii_amount" class="col-sm-2 control-label">订货数量：</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" id="pii_amount" name="pii_amount">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="purc_price" class="col-sm-2 control-label">进价：</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" id="purc_price" name="purc_price">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">存放仓库：</label>
+                    <div class="col-sm-10">
+                        <select  class="selectpicker" name="depot_id" id="depot_id" >
+                            <option th:value="0">请选择</option>
+                            <option th:each="o:${depots}"
+                                    th:value="${o.depot_id}"
+                                    th:text="${o.depot_name}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" id="shen" style="display: none">
+                    <label class="col-sm-2 control-label">状态：</label>
+                    <div class="col-sm-10">
+                        <input type="radio" id="nan" name="pii_state" value="0">待审核&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" id="nv" name="pii_state" value="1">审核通过 &nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" id="san" name="pii_state" value="2">审核不通过
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" >提交</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+</body>
+<script src="/bootstrap-3.3.7-dist/js/bootstrap-datetimepicker.js"></script>
+<script src="/resources/layui/layui.js"></script>
+<script type="text/javascript">
+    layui.use(['layer', 'element', 'jquery'], function () {
+        var $ = layer = layui.layer
+            , element = layui.element,
+            jquery = layui.jquery;
+    })
+    $('.datetimepicker').datetimepicker({
+        minView: "month",
+        format: "yyyy-mm-dd",
+        language: 'zh-CN',
+        autoclose:true
+    });
+    // 进入编辑页面前的请求,返回json
+    function edit(id) {
+        $.ajax({
+            async: true,
+            type: "POST",
+            url: "/In_items/selectByid?id="+id,
+            success: addData,
+            error : function(msg) {
+                alert(msg+"错误数据");
+            },
+            dataType : "json"
+        });
+    }
+    // 查询成功后向模态框插入数据并开启模态框。data是返回的JSON对象
+    function addData(data) {
+        $(".form-group").css("display","block");
+        $("#pii_id").val(data.pii_id);
+        $("#pii_amount").val(data.pii_amount);
+        $("#purc_price").val(data.purc_price);
+        $("#comm_id").selectpicker('val',data.comm_id);//下拉框回显
+        $("#pib_id").selectpicker('val',data.pib_id);
+        $("#depot_id").selectpicker('val',data.depot_id)
+        $("#shen").css("display","none");
+        $("#ModalTitle").text("修改订单明细信息");
+        $("#teacherForm").attr("action","/In_items/upd");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+
+    //审核
+    function edits(id) {
+        $.ajax({
+            async: true,
+            type: "POST",
+            url: "/In_items/selectByid?id="+id,
+            success: addDatas,
+            error : function(msg) {
+                alert(msg+"错误数据");
+            },
+            dataType : "json"
+        });
+    }
+    function addDatas(data) {
+        $(".form-group").css("display","none");
+        $("#pii_id").val(data.pii_id);
+        $("#pii_amount").val(data.pii_amount);
+        $("#comm_id").selectpicker('val',data.comm_id);//下拉框回显
+        $("#depot_id").selectpicker('val',data.depot_id);
+        var state=data.pii_state;
+        if(state=='0'){
+            $('.modal #nan').prop("checked",true);
+        }else if(state=='1'){
+            $('.modal #nv').prop("checked",true);
+        }else if(state=='2'){
+            $('.modal #san').prop("checked",true);
+        }
+        $("#shen").css("display","block");
+        $("#ModalTitle").text("订单审核状态");
+        $("#teacherForm").attr("action","/In_items/shenhe");
+        // 显示模态框
+        $('#addEdit').modal('show');
+
+    }
+
+    //显示新增模态框
+    function add() {
+        $(".form-group").css("display","block");
+        $("#shen").css("display","none");
+        $("#pii_id").val("");
+        $("#pii_amount").val("");
+        $("#purc_price").val("");
+        $("#comm_id").selectpicker('val',0);//下拉框回显
+        $("#pib_id").selectpicker('val',0);
+        $("#depot_id").selectpicker('val',0);
+        $("#ModalTitle").text("新增订单明细信息");
+        $("#teacherForm").attr("action","/In_items/add");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+
+    // 删除请求
+    function del(id) {
+        var r=confirm("确定删除吗");
+        if (r==true){
+            $.ajax({
+                async: true,
+                type: "GET",
+                url: "/In_items/del?id="+id,
+                success: function () {
+                    location.href="/In_items/all";
+                },
+                error : function(msg) {
+                    alert(msg+"错误数据");
+                },
+                dataType:"text"
+            });
+        }
+    }
+    //全选操作,选中属性对应“checked”和“selected”通常用prop设定
+    $("#all").click(function () {
+        if(this.checked){
+            $(":checkbox[name='id[]']").prop("checked",true);
+        }else {
+            $(":checkbox[name='id[]']").prop("checked",false);
+        }
+    });
+    //单选操作
+    $(":checkbox[name='id[]']").click(function () {
+        //列表总数量
+        num=$(":checkbox[name='id[]']").length;
+        //选中的数量
+        nn=$(":checkbox[name='id[]']:checked").length;
+        //设定全选框
+        if(num==nn){
+            $("#all").prop("checked",true);
+        }else {
+            $("#all").prop("checked",false);
+        }
+    });
+    function batchDel() {
+        var ids=new Array();
+        num=$(":checkbox[name='id[]']:checked").length;
+        if(num==0){
+            alert('必须选中一行才可以删除！');
+
+        }else {
+            $.each($(":checkbox[name='id[]']:checked"),function (i,v) {
+                ids[i]=this.value;
+            });
+            var r=confirm("确定删除吗");
+            if (r==true){
+                $.ajax({
+                    url:"/In_items/batchDel",
+                    type:"POST",
+                    data:{ids:ids},
+                    dataType:"text",
+                    success:function(result){
+                        alert("删除成功")
+                        location.href="/In_items/all";
+                    },
+                    error:function(msg){
+                        alert("删除失败")
+                    }
+                });
+
+            }
+        }
+    }
+</script>
+</html>
+
+
+
+

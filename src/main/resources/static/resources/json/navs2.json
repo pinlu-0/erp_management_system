@@ -1,0 +1,155 @@
+[
+  {
+    "title": "基础设置",
+    "icon": "&#xe630;",
+    "href": "",
+    "spread": false,
+    "children": [
+      {
+        "title": "商品管理",
+        "icon": "&#xe61c;",
+        "href": "/Commodity/all",
+        "spread": false
+      },
+      {
+        "title": "员工管理",
+        "icon": "&#xe609;",
+        "href": "/Operator/all",
+        "spread": false
+
+      },
+      {
+        "title": "仓库管理",
+        "icon": "&#xe609;",
+        "href": "/dept/all",
+        "spread": false
+      }
+    ]
+  },
+  {
+    "title": "采购管理",
+    "icon": "&#xe630;",
+    "href": "",
+    "spread": false,
+    "children": [
+      {
+        "title": "供货商信息",
+        "icon": "&#xe61c;",
+        "href": "/Suppliers/all",
+        "spread": false
+      },
+      {
+        "title": "采购合同",
+        "icon": "&#xe609;",
+        "href": "/Contract/all",
+        "spread": false
+      },
+      {
+        "title": "采购订单",
+        "icon": "&#xe609;",
+        "href": "/purchase/query_order",
+        "spread": false
+
+      },
+      {
+        "title": "采购审核",
+        "icon": "&#xe609;",
+        "href": "/Order_items/all",
+        "spread": false
+      }
+    ]
+  },
+  {
+    "title": "销售管理",
+    "icon": "&#xe630;",
+    "href": "",
+    "spread": false,
+    "children": [
+      {
+        "title": "客户信息",
+        "icon": "&#xe61c;",
+        "href": "/Client/all",
+        "spread": false
+      },
+      {
+        "title": "销售客户信息",
+        "icon": "&#xe609;",
+        "href": "/Sale_order/all",
+        "spread": false
+      },
+      {
+        "title": "销售审核",
+        "icon": "&#xe609;",
+        "href": "/Sale_order_items/all",
+        "spread": false
+      }
+    ]
+  },
+  {
+    "title": "库存管理",
+    "icon": "&#xe630;",
+    "href": "",
+    "spread": false,
+    "children": [
+      {
+        "title": "库存查看",
+        "icon": "&#xe61c;",
+        "href": "/Stock/all",
+        "spread": false
+      },
+      {
+        "title": "进货信息",
+        "icon": "&#xe609;",
+        "href": "/In_bill/all",
+        "spread": false
+      },
+      {
+        "title": "进货审核",
+        "icon": "&#xe609;",
+        "href": "/In_items/all",
+        "spread": false
+      }
+    ]
+  },
+  {
+    "title": "系统管理",
+    "icon": "&#xe630;",
+    "href": "",
+    "spread": false,
+    "children": [
+      {
+        "title": "角色管理",
+        "icon": "&#xe61c;",
+        "href": "/Erp_role/all",
+        "spread": false
+      },
+      {
+        "title": "用户管理",
+        "icon": "&#xe609;",
+        "href": "/Erp_user/all",
+        "spread": false
+      }
+    ]
+  },
+  {
+    "title": "其他页面",
+    "icon": "&#xe630;",
+    "href": "",
+    "spread": false,
+    "children": [
+      {
+        "title": "404页面",
+        "icon": "&#xe61c;",
+        "href": "/resources/page/404.html",
+        "spread": false
+      },
+      {
+        "title": "登录",
+        "icon": "&#xe609;",
+        "href": "/Erp_user/logout",
+        "spread": false,
+        "target": "_blank"
+      }
+    ]
+  }
+]

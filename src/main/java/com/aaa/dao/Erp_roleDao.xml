@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.Erp_roleDao">
+
+    <!--条件查询-->
+    <select id="all" parameterType="erp_role" resultType="erp_role">
+        select * from erp_role
+        <where>
+            <if test="r_name != null and r_name != ''">
+             r_name like  concat('%',concat(#{r_name},'%'))
+            </if>
+            <if test="r_code != null and r_code != ''">
+                and r_code like  concat('%',concat(#{r_code},'%'))
+            </if>
+        </where>
+        order by r_id
+    </select>
+
+    <!--添加-->
+    <insert id="add" parameterType="erp_role">
+      insert into erp_role(r_name,r_code,r_desc)
+       values(#{r_name},#{r_code},#{r_desc})
+  </insert>
+    <!--删除-->
+    <delete id="del" parameterType="Integer">
+        delete from erp_role where r_id=#{r_id}
+    </delete>
+    <!--修改-->
+    <select id="selectbyid" parameterType="Integer" resultType="erp_role">
+         select * from erp_role where r_id=#{r_id}
+    </select>
+    <update id="upd" parameterType="erp_role">
+        update erp_role
+        <set>
+           r_code=#{r_code},
+           r_name=#{r_name},
+            r_desc=#{r_desc}
+        </set>
+        where r_id=#{r_id}
+    </update>
+
+</mapper>

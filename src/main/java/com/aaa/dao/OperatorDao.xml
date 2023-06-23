@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.OperatorDao">
+    <select id="all" parameterType="operator" resultType="operator">
+        select * from operator_bill
+        <where>
+            <if test="oper_name != null and oper_name != ''">
+                oper_name like  concat('%',concat(#{oper_name},'%'))
+            </if>
+            <if test="oper_spell_code != null and oper_spell_code != ''">
+                and oper_spell_code like  concat('%',concat(#{oper_spell_code},'%'))
+            </if>
+        </where>
+        order by oper_id
+    </select>
+    <insert id="add" parameterType="operator">
+      insert into operator_bill(oper_spell_code,oper_name,oper_sex,oper_tel,oper_mobile_tel,oper_address,
+      oper_post_code,oper_Id_number,oper_sort)
+      values(#{oper_spell_code},#{oper_name},#{oper_sex},
+      #{oper_tel},#{oper_mobile_tel},#{oper_address},#{oper_post_code},#{oper_Id_number},#{oper_sort})
+  </insert>
+    <delete id="del" parameterType="Integer">
+        delete from operator_bill where oper_id=#{oper_id}
+    </delete>
+    <select id="selectbyid" parameterType="Integer" resultType="operator">
+         select * from operator_bill where oper_id=#{oper_id}
+    </select>
+    <update id="upd" parameterType="operator">
+        update operator_bill
+        <set>
+            oper_spell_code=#{oper_spell_code},
+            oper_name=#{oper_name},
+            oper_sex=#{oper_sex},
+            oper_tel=#{oper_tel},
+            oper_mobile_tel=#{oper_mobile_tel},
+            oper_address=#{oper_address},
+            oper_post_code=#{oper_post_code},
+            oper_Id_number=#{oper_Id_number},
+            oper_sort=#{oper_sort}
+        </set>
+        where oper_id=#{oper_id}
+    </update>
+    <delete id="batchDel">
+        delete from operator_bill where oper_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

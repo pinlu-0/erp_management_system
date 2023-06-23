@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.ContractDao">
+    <!--外键处理-->
+    <resultMap id="cmap" type="contract">
+        <id column="pc_id" property="pc_id"/>
+        <result property="supp_id" column="cupp_id"/>
+        <result property="comm_id" column="comm_id"/>
+        <association property="suppliers" column="supp_id"  javaType="suppliers"/>
+        <association property="commodity" column="comm_id"  javaType="commodity"/>
+    </resultMap>
+    <!--条件查询-->
+    <select id="all" parameterType="contract" resultMap="cmap">
+        select * from purchase_contract p,suppliers_bill s,commodity_bill  cb
+        <where>
+           p.supp_id=s.supp_id and p.comm_id=cb.comm_id
+            <if test="supp_id !=null and supp_id!=0">
+                and p.supp_id=#{supp_id}
+            </if>
+            <if test="comm_id !=null and comm_id!=0">
+                and p.comm_id=#{comm_id}
+            </if>
+            <if test="pc_pay != null and pc_pay != ''">
+                and pc_pay like  concat('%',concat(#{pc_pay},'%'))
+            </if>
+        </where>
+        order by pc_id
+    </select>
+
+    <!--添加-->
+    <insert id="add" parameterType="contract">
+      insert into purchase_contract(supp_id,comm_id,pc_price,pc_pay,pc_date,pc_period)
+       values(#{supp_id},#{comm_id},#{pc_price},#{pc_pay},#{pc_date},#{pc_period})
+  </insert>
+    <!--删除-->
+    <delete id="del" parameterType="Integer">
+        delete from purchase_contract where pc_id=#{pc_id}
+    </delete>
+    <!--修改-->
+    <select id="selectbyid" parameterType="Integer" resultType="contract">
+         select *,DATE_FORMAT(pc_date ,"%Y-%m-%d") AS pc_dates from  purchase_contract where pc_id=#{pc_id}
+    </select>
+    <update id="upd" parameterType="contract">
+        update purchase_contract
+        <set>
+            supp_id=#{supp_id},
+            comm_id=#{comm_id},
+            pc_price=#{pc_price},
+            pc_pay=#{pc_pay},
+            pc_date=#{pc_date},
+            pc_period=#{pc_period}
+        </set>
+        where pc_id=#{pc_id}
+    </update>
+
+    <!--供货商下拉框-->
+    <select id="suall" resultType="suppliers">
+         select * from suppliers_bill
+    </select>
+    <!--商品下拉框-->
+    <select id="coall" resultType="commodity">
+         select * from commodity_bill
+    </select>
+</mapper>

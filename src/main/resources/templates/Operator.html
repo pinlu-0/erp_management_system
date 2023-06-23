@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://wwww.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>业务员信息</title>
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
+    <script src="/bootstrap-3.3.7-dist/js/jquery-3.1.1.js"></script>
+    <script src="/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css" media="all">
+</head>
+<style>
+    .form-control{
+        height: 30px;
+        width: 220px;
+
+    }
+    th{
+        text-align: center;
+    }
+</style>
+
+<body>
+
+<div class="container  table table-hover" style="background-color: #ffffff;padding: 50px">
+
+    <!--条件查询-->
+    <form action="/Operator/all" method="get">
+        <label>姓名：</label>
+        <input type="text"  name="oper_name" th:value="${op.oper_name}" style="height: 30px">
+        <label >拼音编码：</label>
+        <input type="text"   name="oper_spell_code" th:value="${op.oper_spell_code}" style="height: 30px">
+        <button type="submit" class="btn btn-default">查询</button>
+    </form>
+    <button class="btn btn-primary" onclick="batchDel()">批量删除</button>
+    <button class="btn btn-primary" onclick="add()">新增</button>
+    <div class="table-responsive">
+        <table class="table table-hover " border="1px" cellpadding="1px" cellspacing="1px" >
+            <thead style="text-align: center">
+            <th><input type="checkbox" id="all">全选</th>
+            <th>拼音编码</th>
+            <th>姓名</th>
+            <th>性别</th>
+            <th>电话</th>
+            <th>手机</th>
+            <th>地址</th>
+            <th>邮编</th>
+            <th>身份证号</th>
+            <th>类别</th>
+            <th>操作</th>
+            </thead>
+            <tbody class=".table-striped .table-bordered" >
+            <!-- class="active,success,info,warning,danger"代表不同的颜色-->
+                <tr th:each="o:${operat}" style="text-align: center">
+                    <td>
+                        <input type="checkbox" name="id[]" th:value="${o.oper_id}">
+                    </td>
+                    <td th:text="${o.oper_spell_code}"></td>
+                    <td th:text="${o.oper_name}"></td>
+                    <td th:text="${o.oper_sex}"></td>
+                    <td th:text="${o.oper_tel}"></td>
+                    <td th:text="${o.oper_mobile_tel}"></td>
+                    <td th:text="${o.oper_address}"></td>
+                    <td th:text="${o.oper_post_code}"></td>
+                    <td th:text="${o.oper_Id_number}"> </td>
+                    <td th:text="${o.oper_sort}"></td>
+                    <td>
+                        <button id="goEdit" class="btn btn-info" th:onclick="'javascript:edit('+${o.oper_id}+');'">编辑</button>
+                        <button id="del" class="btn btn-danger" th:onclick="'javascript:del('+${o.oper_id}+');'">删除</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- 新增信息的模态框 -->
+<div class="modal fade" id="addEdit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalTitle">模态框（Modal）标题</h4>
+            </div>
+            <form id="teacherForm" class="form-horizontal" action="/Operator/add" method="post" enctype="multipart/form-data">
+                <input id="oper_id" name="oper_id" type="hidden" >
+                <div class="form-group">
+                    <label for="oper_spell_code" class="col-sm-2 control-label">拼音编码：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="oper_spell_code" name="oper_spell_code">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="oper_name" class="col-sm-2 control-label">姓名：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="oper_name" name="oper_name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">性别：</label>
+                    <div class="col-sm-10">
+
+                        <input type="radio" id="nan" name="oper_sex" value="男">男&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" id="nv" name="oper_sex" value="女">女
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="oper_tel" class="col-sm-2 control-label">电话：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="oper_tel" name="oper_tel" maxlength="8">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="oper_mobile_tel" class="col-sm-2 control-label">手机：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="oper_mobile_tel" name="oper_mobile_tel" maxlength="11">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="oper_address" class="col-sm-2 control-label">地址：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="oper_address" name="oper_address">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="oper_post_code" class="col-sm-2 control-label">邮编：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="oper_post_code" name="oper_post_code" maxlength="6">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="oper_Id_number" class="col-sm-2 control-label">身份证号：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="oper_Id_number" name="oper_Id_number" maxlength="18">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="oper_sort" class="col-sm-2 control-label">类别：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="oper_sort" name="oper_sort">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" >提交</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+</body>
+<script src="/resources/layui/layui.js"></script>
+<script type="text/javascript">
+    layui.use(['layer', 'element', 'jquery'], function () {
+        var $ = layer = layui.layer
+            , element = layui.element,
+            jquery = layui.jquery;
+    })
+    // 进入编辑页面前的请求,返回json
+    function edit(id) {
+        $.ajax({
+            async: true,
+            type: "POST",
+            url: "/Operator/selectByid?id="+id,
+            success: addData,
+            error : function(msg) {
+                alert(msg+"错误数据");
+            },
+            dataType : "json"
+        });
+    }
+    // 查询成功后向模态框插入数据并开启模态框。data是返回的JSON对象
+    function addData(data) {
+        $("#oper_id").val(data.oper_id);
+        $("#oper_spell_code").val(data.oper_spell_code);
+        $("#oper_name").val(data.oper_name);
+        $("#oper_tel").val(data.oper_tel);
+        $("#oper_mobile_tel").val(data.oper_mobile_tel);
+        $("#oper_address").val(data.oper_address);
+        $("#oper_post_code").val(data.oper_post_code);
+        $("#oper_Id_number").val(data.oper_Id_number);
+        $("#oper_sort").val(data.oper_sort);
+        var gender=data.oper_sex;
+        if(gender=='男'){
+            $('.modal #nan').prop("checked",true);
+        }else if(gender=='女'){
+            $('.modal #nv').prop("checked",true);
+        }
+        $("#ModalTitle").text("修改业务员信息");
+        $("#teacherForm").attr("action","/Operator/upd");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+    //显示新增模态框
+    function add() {
+        $("#oper_id").val("");
+        $("#oper_spell_code").val("");
+        $("#oper_name").val("");
+        $("#oper_tel").val("");
+        $("#oper_mobile_tel").val("");
+        $("#oper_address").val("");
+        $("#oper_post_code").val("");
+        $("#oper_Id_number").val("");
+        $("#oper_sort").val("");
+        $("input:radio[name='oper_sex']:checked").val("");
+        $("#ModalTitle").text("新增业务员信息");
+        $("#teacherForm").attr("action","/Operator/add");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+
+    // 删除请求
+    function del(id) {
+        var r=confirm("确定删除吗");
+        if (r==true){
+            $.ajax({
+                async: true,
+                type: "GET",
+                url: "/Operator/del?id="+id,
+                success: function () {
+                    location.href="/Operator/all";
+                },
+                error : function(msg) {
+                    alert(msg+"错误数据");
+                },
+                dataType:"text"
+            });
+        }
+    }
+
+    //全选操作,选中属性对应“checked”和“selected”通常用prop设定
+    $("#all").click(function () {
+        if(this.checked){
+            $(":checkbox[name='id[]']").prop("checked",true);
+        }else {
+            $(":checkbox[name='id[]']").prop("checked",false);
+        }
+    });
+    //单选操作
+    $(":checkbox[name='id[]']").click(function () {
+        //列表总数量
+        num=$(":checkbox[name='id[]']").length;
+        //选中的数量
+        nn=$(":checkbox[name='id[]']:checked").length;
+        //设定全选框
+        if(num==nn){
+            $("#all").prop("checked",true);
+        }else {
+            $("#all").prop("checked",false);
+        }
+    });
+    function batchDel() {
+        var ids=new Array();
+        num=$(":checkbox[name='id[]']:checked").length;
+        if(num==0){
+            alert('必须选中一行才可以删除！');
+
+        }else {
+            $.each($(":checkbox[name='id[]']:checked"),function (i,v) {
+                ids[i]=this.value;
+            });
+            var r=confirm("确定删除吗");
+            if (r==true){
+                $.ajax({
+                    url:"/Operator/batchDel",
+                    type:"POST",
+                    data:{ids:ids},
+                    dataType:"text",
+                    success:function(result){
+                        alert("删除成功")
+                        location.href="/Operator/all";
+                    },
+                    error:function(msg){
+                        alert("删除失败")
+                    }
+                });
+
+            }
+        }
+    }
+</script>
+</html>
+
+

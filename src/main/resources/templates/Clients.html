@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://wwww.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>客户信息</title>
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
+    <script src="/bootstrap-3.3.7-dist/js/jquery-3.1.1.js"></script>
+    <script src="/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+    <!--    引入下拉列表框-->
+    <script type="text/javascript" src="/bootstrap-3.3.7-dist/js/bootstrap-select.min.js"></script>
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap-select.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/bootstrap-3.3.7-dist/css/bootstrap-select.min.css"></script>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css" media="all" />
+</head>
+<style>
+    .form-control{
+        height: 30px;
+        width: 220px;
+    }
+    th{
+        text-align: center;
+    }
+</style>
+<body>
+<div class="container table table-hover" style="background-color: #ffffff;padding: 50px">
+    <!--条件查询-->
+    <form action="/Client/all" method="get">
+        <label>拼音编码：</label>
+        <input type="text"  name="clie_spell_code" th:value="${cl.clie_spell_code}" style="height: 30px">
+        <label>简称：</label>
+        <input type="text"  name="clie_short_name" th:value="${cl.clie_short_name}" style="height: 30px">
+        <label >姓名：</label>
+        <input type="text"   name="clie_name" th:value="${cl.clie_name}" style="height: 30px">
+        <button type="submit" class="btn btn-default">查询</button>
+    </form>
+    <button class="btn btn-primary" onclick="batchDel()">批量删除</button>
+    <button class="btn btn-primary" onclick="add()">新增</button>
+    <div class="table-responsive">
+        <table class="table table-hover " border="1px" cellpadding="1px" cellspacing="1px" >
+            <thead style="text-align: center">
+            <th><input type="checkbox" id="all">全选</th>
+            <th>拼音编码</th>
+            <th>简称</th>
+            <th>姓名</th>
+            <th>联系人</th>
+            <th>地址</th>
+            <th>邮编</th>
+            <th>电话</th>
+            <th>传真</th>
+            <th>开户行</th>
+            <th>银行账户</th>
+            <th>业务员</th>
+            <th>授信额度</th>
+            <th>操作</th>
+            </thead>
+            <tbody class=".table-striped .table-bordered" >
+            <!-- class="active,success,info,warning,danger"代表不同的颜色-->
+
+                <tr th:each="s:${clients}" style="text-align: center">
+                    <td>
+                        <input type="checkbox" name="id[]" th:value="${s.clie_id}">
+                    </td>
+                    <td th:text="${s.clie_spell_code}"></td>
+                    <td th:text="${s.clie_short_name}"></td>
+                    <td th:text="${s.clie_name}"></td>
+                    <td th:text="${s.clie_link_man}"></td>
+                    <td th:text="${s.clie_address}"></td>
+                    <td th:text="${s.clie_post_code}"></td>
+                    <td th:text="${s.clie_tel}"></td>
+                    <td th:text="${s.clie_fax}"></td>
+                    <td th:text="${s.clie_bank}"></td>
+                    <td th:text="${s.clie_iban}"></td>
+                    <td th:text="${s.operator.oper_name}"></td>
+                    <td th:text="${s.clie_creditlimt}"></td>
+                    <td>
+                        <button id="goEdit" class="btn btn-info" th:onclick="'javascript:edit('+${s.clie_id}+');'">编辑
+                        </button>
+                        <button id="del" class="btn btn-danger" th:onclick="'javascript:del('+${s.clie_id}+');'">删除</button>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- 新增信息的模态框 -->
+<div class="modal fade" id="addEdit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalTitle">模态框（Modal）标题</h4>
+            </div>
+            <form id="teacherForm" onSubmit="return checkForm()" class="form-horizontal" action="/Client/add" method="post" enctype="multipart/form-data">
+                <input id="clie_id" name="clie_id" type="hidden" >
+                <div class="form-group">
+                    <label for="clie_spell_code" class="col-sm-2 control-label">拼音编码：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="clie_spell_code" name="clie_spell_code" maxlength="5" onblur="code()">
+                        <span id="coderr"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="clie_short_name" class="col-sm-2 control-label">简称：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="clie_short_name" name="clie_short_name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="clie_name" class="col-sm-2 control-label">姓名：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="clie_name" name="clie_name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="clie_link_man" class="col-sm-2 control-label">联系人：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="clie_link_man" name="clie_link_man">
+                    </div>
+                </div>
+              <div class="form-group">
+                    <label class="col-sm-2 control-label">业务员：</label>
+                    <div class="col-sm-10">
+                        <select  class="selectpicker" name="oper_id" id="oper_id">
+                            <option th:value="0">请选择</option>
+                            <option th:each="o:${op}"
+                                    th:value="${o.oper_id}"
+                                    th:text="${o.oper_name}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="clie_tel" class="col-sm-2 control-label">电话：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="clie_tel" name="clie_tel" maxlength="11">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="clie_post_code" class="col-sm-2 control-label">邮编：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="clie_post_code" name="clie_post_code" maxlength="6">
+                        <span id="codeerr"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="clie_address" class="col-sm-2 control-label">地址：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="clie_address" name="clie_address">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="clie_fax" class="col-sm-2 control-label">传真：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="clie_fax" name="clie_fax" maxlength="11">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="clie_bank" class="col-sm-2 control-label">开户行：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="clie_bank" name="clie_bank">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="clie_iban" class="col-sm-2 control-label">银行账户：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="clie_iban" name="clie_iban" maxlength="19">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="clie_creditlimt" class="col-sm-2 control-label">授信额度：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="clie_creditlimt" name="clie_creditlimt" maxlength="2">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" >提交</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+</body>
+<script type="text/javascript" src="/resources/layui/layui.js"></script>
+<script>
+    layui.use(['layer', 'element', 'jquery'], function () {
+        var $ = layer = layui.layer
+            , element = layui.element,
+            jquery = layui.jquery;
+    })
+
+    // 进入编辑页面前的请求,返回json
+    function edit(id) {
+        $.ajax({
+            async: true,
+            type: "POST",
+            url: "/Client/selectByid?id="+id,
+            success: addData,
+            error : function(msg) {
+                alert(msg+"错误数据");
+            },
+            dataType : "json"
+        });
+    }
+    // 查询成功后向模态框插入数据并开启模态框。data是返回的JSON对象
+    function addData(data) {
+        $("#clie_id").val(data.clie_id);
+        $("#clie_spell_code").val(data.clie_spell_code);
+        $("#clie_short_name").val(data.clie_short_name);
+        $("#clie_name").val(data.clie_name);
+        $("#clie_link_man").val(data.clie_link_man);
+        $("#clie_address").val(data.clie_address);
+        $("#clie_post_code").val(data.clie_post_code);
+        $("#clie_tel").val(data.clie_tel);
+        $("#clie_fax").val(data.clie_fax);
+        $("#clie_bank").val(data.clie_bank);
+        $("#clie_iban").val(data.clie_iban);
+        $("#clie_creditlimt").val(data.clie_creditlimt);
+        $("#oper_id").selectpicker('val',data.oper_id);//下拉框回显
+        $("#ModalTitle").text("修改客户信息");
+        $("#teacherForm").attr("action","/Client/upd");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+    //显示新增模态框
+    function add() {
+        $("#clie_id").val("");
+        $("#clie_spell_code").val("");
+        $("#clie_short_name").val("");
+        $("#clie_name").val("");
+        $("#clie_link_man").val("");
+        $("#clie_address").val("");
+        $("#clie_post_code").val("");
+        $("#clie_tel").val("");
+        $("#clie_fax").val("");
+        $("#clie_bank").val("");
+        $("#clie_iban").val("");
+        $("#clie_creditlimt").val("");
+        $("#oper_id").selectpicker('val',[[${session.userid}]]);
+
+        $("#ModalTitle").text("新增客户信息");
+        $("#teacherForm").attr("action","/Client/add");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+
+    // 删除请求
+    function del(id) {
+        var r=confirm("确定删除吗");
+        if (r==true){
+            $.ajax({
+                async: true,
+                type: "GET",
+                url: "/Client/del?id="+id,
+                dataType:"text",
+                success: function () {
+                    location.href="/Client/all";
+                },
+                error : function(msg) {
+                    alert(msg+"错误数据");
+                }
+            });
+        }
+    }
+
+    //全选操作,选中属性对应“checked”和“selected”通常用prop设定
+    $("#all").click(function () {
+        if(this.checked){
+            $(":checkbox[name='id[]']").prop("checked",true);
+        }else {
+            $(":checkbox[name='id[]']").prop("checked",false);
+        }
+    });
+    //单选操作
+    $(":checkbox[name='id[]']").click(function () {
+        //列表总数量
+        num=$(":checkbox[name='id[]']").length;
+        //选中的数量
+        nn=$(":checkbox[name='id[]']:checked").length;
+        //设定全选框
+        if(num==nn){
+            $("#all").prop("checked",true);
+        }else {
+            $("#all").prop("checked",false);
+        }
+    });
+    function batchDel() {
+        var ids=new Array();
+        num=$(":checkbox[name='id[]']:checked").length;
+        if(num==0){
+            alert('必须选中一行才可以删除！');
+
+        }else {
+            $.each($(":checkbox[name='id[]']:checked"),function (i,v) {
+                ids[i]=this.value;
+            });
+            var r=confirm("确定删除吗");
+            if (r==true){
+                $.ajax({
+                    url:"/Client/batchDel",
+                    type:"POST",
+                    data:{ids:ids},
+                    dataType:"text",
+                    success:function(result){
+                        alert("删除成功")
+                        location.href="/Client/all";
+                    },
+                    error:function(msg){
+                        alert("删除失败")
+                    }
+                });
+
+            }
+        }
+    }
+</script>
+
+</html>
+
+
+

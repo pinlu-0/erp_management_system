@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.SuppliersDao">
+    <!--外键处理-->
+    <resultMap id="sumap" type="suppliers">
+        <id column="supp_id" property="supp_id"/>
+        <result property="oper_id" column="oper_id"/>
+        <association property="operator" column="oper_id"  javaType="operator"/>
+    </resultMap>
+    <!--条件查询-->
+    <select id="all" parameterType="suppliers" resultMap="sumap">
+        select * from suppliers_bill s,operator_bill o
+        <where>
+            s.oper_id=o.oper_id
+            <if test="supp_short_name != null and supp_short_name != ''">
+               and supp_short_name like  concat('%',concat(#{supp_short_name},'%'))
+            </if>
+            <if test="supp_name != null and supp_name != ''">
+                and supp_name like  concat('%',concat(#{supp_name},'%'))
+            </if>
+            <if test="supp_spell_code != null and supp_spell_code != ''">
+                and supp_spell_code like  concat('%',concat(#{supp_spell_code},'%'))
+            </if>
+        </where>
+        order by supp_id
+    </select>
+
+<!--添加-->
+    <insert id="add" parameterType="suppliers">
+      insert into suppliers_bill(supp_spell_code,supp_short_name,supp_name,supp_address,supp_post_code,
+      supp_sort,supp_tel,supp_fax,supp_bank,supp_iban,supp_storage_address,supp_storage_tel,oper_id)
+       values(#{supp_spell_code},#{supp_short_name},#{supp_name},
+      #{supp_address},#{supp_post_code},#{supp_sort},#{supp_tel},
+      #{supp_fax},#{supp_bank},#{supp_iban},#{supp_storage_address},#{supp_storage_tel},#{oper_id})
+  </insert>
+    <!--删除-->
+    <delete id="del" parameterType="Integer">
+        delete from suppliers_bill where supp_id=#{supp_id}
+    </delete>
+    <!--修改-->
+    <select id="selectbyid" parameterType="Integer" resultType="suppliers">
+         select * from suppliers_bill where supp_id=#{supp_id}
+    </select>
+    <update id="upd" parameterType="suppliers">
+        update suppliers_bill
+        <set>
+            supp_spell_code=#{supp_spell_code},
+            supp_short_name=#{supp_short_name},
+            supp_name=#{supp_name},
+            supp_address=#{supp_address},
+            supp_post_code=#{supp_post_code},
+            supp_sort=#{supp_sort},
+            supp_tel=#{supp_tel},
+            supp_fax=#{supp_fax},
+            supp_bank=#{supp_bank},
+            supp_iban=#{supp_iban},
+            supp_storage_address=#{supp_storage_address},
+            supp_storage_tel=#{supp_storage_tel},
+            oper_id=#{oper_id}
+        </set>
+        where supp_id=#{supp_id}
+    </update>
+    <!--多选删除-->
+    <delete id="batchDel">
+        delete from suppliers_bill where supp_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+<!--业务员下拉框-->
+    <select id="opall" resultType="operator">
+         select * from operator_bill
+    </select>
+</mapper>

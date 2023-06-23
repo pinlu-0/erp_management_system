@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.In_itemsDao">
+    <!--外键处理-->
+    <resultMap id="omap" type="in_items">
+        <id column="pii_id" property="pii_id"/>
+        <result property="pib_id" column="pib_id"/>
+        <result property="comm_id" column="comm_id"/>
+        <association property="in_bill" column="pib_id"  javaType="in_bill" select="com.aaa.dao.In_billDao.alls"/>
+        <association property="commodity" column="comm_id"  javaType="commodity"/>
+       <collection property="depot" ofType="depot"/>
+    </resultMap>
+    <!--条件查询-->
+    <select id="all" parameterType="in_items" resultMap="omap">
+        select * from purchase_in_items p,purchase_in_bill o,commodity_bill s,suppliers_bill sb,operator_bill ob,depot_bill db
+         where
+           p.pib_id=o.pib_id and p.comm_id=s.comm_id and o.supp_id=sb.supp_id and o.oper_id=ob.oper_id and p.depot_id=db.depot_id
+        <if test="comm_id !=null and comm_id!=0">
+            and s.comm_id=#{comm_id}
+        </if>
+        <if test="pii_state !=null and pii_state!=3">
+            and pii_state=#{pii_state}
+        </if>
+        <if test="depot_id !=null and depot_id!=0">
+            and p.depot_id=#{depot_id}
+        </if>
+        order by pii_id
+    </select>
+
+    <!--添加-->
+    <insert id="add" parameterType="in_items">
+      insert into purchase_in_items(pib_id,comm_id,pii_amount,purc_price,depot_id)
+        values(#{pib_id},#{comm_id},#{pii_amount},#{purc_price},#{depot_id})
+  </insert>
+    <!--删除-->
+    <delete id="del" parameterType="Integer">
+        delete from purchase_in_items where pii_id=#{pii_id}
+    </delete>
+    <!--修改-->
+    <select id="selectbyid" parameterType="Integer" resultType="in_items">
+         select * from purchase_in_items where pii_id=#{pii_id}
+    </select>
+    <update id="upd" parameterType="in_items">
+        update purchase_in_items
+        <set>
+            comm_id=#{comm_id},
+            pib_id=#{pib_id},
+            pii_amount=#{pii_amount},
+            purc_price=#{purc_price},
+            depot_id=#{depot_id}
+        </set>
+        where pii_id=#{pii_id}
+    </update>
+<!--审核-->
+    <update id="shenhe" parameterType="in_items">
+        update purchase_in_items
+        <set>
+            pii_state=#{pii_state}
+        </set>
+        where pii_id=#{pii_id}
+    </update>
+    <!--多选删除-->
+    <delete id="batchDel">
+        delete from purchase_in_items where pii_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!--业务员下拉框-->
+    <select id="coall" resultType="commodity">
+         select * from commodity_bill
+    </select>
+
+    <resultMap id="omaps" type="in_bill">
+        <id column="pib_id" property="pib_id"/>
+        <result property="oper_id" column="oper_id"/>
+        <result property="supp_id" column="supp_id"/>
+        <collection property="operator" column="oper_id"  ofType="operator"/>
+        <collection property="suppliers" column="supp_id"  ofType="suppliers"/>
+    </resultMap>
+    <!--供货商下拉框-->
+    <select id="iball" resultMap="omaps">
+        select * from purchase_in_bill p,operator_bill o,suppliers_bill s where
+           p.oper_id=o.oper_id and p.supp_id=s.supp_id
+    </select>
+
+    <!--//采购审核通过添加商品数量-->
+    <update id="addupsotck" parameterType="in_items">
+        update stock set amount=amount+#{pii_amount} where comm_id=#{comm_id} and  depot_id=#{depot_id}
+    </update>
+
+    <!--    //采购审核通过之后出现问题修改成不通过是商品数量减少-->
+    <update id="upsotck" parameterType="in_items">
+        update stock set amount=amount-#{pii_amount} where comm_id=#{comm_id} and  depot_id=#{depot_id}
+    </update>
+    <!--仓库下拉框-->
+    <select id="depot" resultType="depot">
+        select * from depot_bill
+    </select>
+</mapper>

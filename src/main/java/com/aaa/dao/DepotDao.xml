@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.DepotDao">
+    <resultMap id="dmap" type="depot">
+        <id column="depot_id" property="depot_id"/>
+        <result column="oper_id" property="oper_id"/>
+        <association property="operator" column="oper_id" javaType="operator"/>
+    </resultMap>
+    <!--条件查询-->
+    <select id="all" parameterType="depot"  resultMap="dmap">
+        select * from depot_bill d,operator_bill op
+        <where>
+             d.oper_id=op.oper_id
+            <if test="depot_name != null and depot_name != ''">
+               and  depot_name like  concat('%',concat(#{depot_name},'%'))
+            </if>
+            <if test="depot_sort != null and depot_sort != ''">
+                and depot_sort like  concat('%',concat(#{depot_sort},'%'))
+            </if>
+            <if test="depot_address != null and depot_address != ''">
+                and depot_address like  concat('%',concat(#{depot_address},'%'))
+            </if>
+        </where>
+        order by depot_id
+    </select>
+<!--下拉框-->
+    <select id="opall" resultType="operator">
+         select * from operator_bill
+    </select>
+    <!--添加-->
+    <insert id="add" parameterType="depot">
+      insert into depot_bill(depot_name,depot_sort,depot_desc,depot_address,oper_id)
+       values(#{depot_name},#{depot_sort},#{depot_desc},#{depot_address},#{oper_id})
+  </insert>
+    <!--删除-->
+    <delete id="del" parameterType="Integer">
+        delete from depot_bill where depot_id=#{depot_id}
+    </delete>
+    <!--修改-->
+    <select id="selectbyid" parameterType="Integer" resultType="depot">
+         select * from depot_bill where depot_id=#{depot_id}
+    </select>
+    <update id="upd" parameterType="depot">
+        update depot_bill
+        <set>
+            depot_name=#{depot_name},
+            depot_sort=#{depot_sort},
+            depot_desc=#{depot_desc},
+            depot_address=#{depot_address},
+            oper_id=#{oper_id}
+        </set>
+        where depot_id=#{depot_id}
+    </update>
+    <!--多选删除-->
+    <delete id="batchDel">
+        delete from depot_bill where depot_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

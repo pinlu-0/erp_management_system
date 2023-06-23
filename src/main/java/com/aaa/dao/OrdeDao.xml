@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aaa.dao.OrdeDao">
+    <!--外键处理-->
+    <resultMap id="omap" type="orde">
+        <id column="po_id" property="po_id"/>
+        <result property="oper_id" column="oper_id"/>
+        <result property="supp_id" column="supp_id"/>
+        <collection property="suppliers" ofType="suppliers"/>
+        <collection property="operator" ofType="operator"/>
+    </resultMap>
+    <!--条件查询-->
+    <select id="all" parameterType="orde" resultMap="omap">
+        select * from purchase_orde p,operator_bill o,suppliers_bill s
+        <where>
+           p.oper_id=o.oper_id and p.supp_id=s.supp_id
+            <if test="supp_id != null and supp_id != 0">
+                and p.supp_id=#{supp_id}
+            </if>
+            <if test="oper_id != null and oper_id != 0">
+                and p.oper_id=#{oper_id}
+            </if>
+            <if test="cbill != null and cbill != ''">
+                and cbill like  concat('%',concat(#{cbill},'%'))
+            </if>
+        </where>
+        order by po_id
+    </select>
+
+    <!--外键处理-->
+    <resultMap id="omaps" type="orde">
+        <id column="po_id" property="po_id"/>
+        <result property="oper_id" column="oper_id"/>
+        <result property="supp_id" column="supp_id"/>
+        <collection property="suppliers" ofType="suppliers"/>
+        <collection property="operator" ofType="operator"/>
+    </resultMap>
+    <!--条件查询-->
+    <select id="alls" parameterType="Integer" resultMap="omaps">
+        select * from purchase_orde p,operator_bill o,suppliers_bill s
+        where
+            p.oper_id=o.oper_id and p.supp_id=s.supp_id and po_id=#{po_id}
+    </select>
+
+    <!--添加-->
+    <insert id="add" parameterType="orde">
+      insert into purchase_orde(supp_id,po_date,po_begain_date,pe_end_date,oper_id,cbill)
+       values(#{supp_id},#{po_date},#{po_begain_date},#{pe_end_date},
+      #{oper_id},#{cbill})
+  </insert>
+    <!--删除-->
+    <delete id="del" parameterType="Integer">
+        delete from purchase_orde where po_id=#{po_id}
+    </delete>
+    <!--修改-->
+    <select id="selectbyid" parameterType="Integer" resultType="orde">
+         select *,DATE_FORMAT(po_date,"%Y-%m-%d")
+         AS po_dates,DATE_FORMAT(po_begain_date,"%Y-%m-%d")
+         AS po_begain_dates,DATE_FORMAT(pe_end_date,"%Y-%m-%d")
+         AS pe_end_dates from purchase_orde where po_id=#{po_id}
+    </select>
+    <update id="upd" parameterType="orde">
+        update purchase_orde
+        <set>
+            supp_id=#{supp_id},
+            po_date=#{po_date},
+            po_begain_date=#{po_begain_date},
+            pe_end_date=#{pe_end_date},
+            oper_id=#{oper_id},
+            cbill=#{cbill}
+        </set>
+        where po_id=#{po_id}
+    </update>
+    <!--多选删除-->
+    <delete id="batchDel">
+        delete from purchase_orde where po_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <!--业务员下拉框-->
+    <select id="opall" resultType="operator">
+         select * from operator_bill
+    </select>
+    <!--供货商下拉框-->
+    <select id="suall" resultType="suppliers">
+         select * from suppliers_bill
+    </select>
+</mapper>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://wwww.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>采购合同</title>
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
+    <script src="/bootstrap-3.3.7-dist/js/jquery-3.1.1.js"></script>
+    <script src="/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+  <!-- 引入下拉列表框-->
+    <link href="/bootstrap-3.3.7-dist/css/bootstrap-select.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/bootstrap-3.3.7-dist/js/bootstrap-select.min.js"></script>
+    <link rel="stylesheet" href="/resources/layui/css/layui.css" media="all">
+</head>
+<style>
+    .form-control{
+        height: 30px;
+        width: 220px;
+
+    }
+    th{
+        text-align: center;
+    }
+</style>
+<body>
+
+<div class="container  table table-hover" style="background-color: #ffffff;padding: 50px">
+    <!--条件查询-->
+    <form action="/Contract/all" method="get">
+        <label>供货商</label>
+        <select  class="selectpicker" name="supp_id">
+            <option th:value="0">请选择</option>
+            <option th:each="f:${su}"
+                    th:value="${f.supp_id}"
+                    th:text="${f.supp_name}"
+                    th:selected="${f.supp_id==con.supp_id}"></option>
+        </select>
+        <label>商品</label>
+        <select  class="selectpicker" name="comm_id">
+            <option th:value="0">请选择</option>
+            <option th:each="f:${com}"
+                    th:value="${f.comm_id}"
+                    th:text="${f.comm_name}"
+                    th:selected="${f.comm_id eq con.comm_id}"></option>
+        </select>
+        <label >付款方式：</label>
+        <input type="text"   name="pc_pay" th:value="${con.pc_pay}" style="height: 30px">
+        <button type="submit" class="btn btn-default">查询</button>
+    </form>
+    <button class="btn btn-primary" onclick="add()">新增</button>
+    <div class="table-responsive">
+        <table class="table table-hover " border="1px" cellpadding="1px" cellspacing="1px" >
+            <thead style="text-align: center">
+            <th>供货商</th>
+            <th>商品</th>
+            <th>进价</th>
+            <th>付款方式</th>
+            <th>签订日期</th>
+            <th>合同期限</th>
+            <th>操作</th>
+            </thead>
+            <tbody class=".table-striped .table-bordered" >
+            <!-- class="active,success,info,warning,danger"代表不同的颜色-->
+
+                <tr th:each="s:${contract}" style="text-align: center">
+                    <td th:text="${s.suppliers.supp_name}"></td>
+                    <td th:text="${s.commodity.comm_name}"></td>
+                    <td th:text="${s.pc_price}"></td>
+                    <td th:text="${s.pc_pay}"></td>
+                    <td th:text="${s.pc_date}"></td>
+                    <td th:text="${s.pc_period}"></td>
+                    <td>
+                        <button id="goEdit" class="btn btn-info" th:onclick="'javascript:edit('+${s.pc_id}+');'">编辑</button>
+                        <button id="del" class="btn btn-danger" th:onclick="'javascript:del('+${s.pc_id}+');'">删除</button>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- 新增信息的模态框 -->
+<div class="modal fade" id="addEdit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="ModalTitle">模态框（Modal）标题</h4>
+            </div>
+            <form id="teacherForm" class="form-horizontal" action="/Contract/add" method="post" enctype="multipart/form-data">
+                <input id="pc_id" name="pc_id" type="hidden" >
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">供货商：</label>
+                    <div class="col-sm-10">
+                        <select  class="selectpicker" name="supp_id" id="supp_id" >
+                            <option th:value="0">请选择</option>
+                            <option th:each="o:${su}"
+                                    th:value="${o.supp_id}"
+                                    th:text="${o.supp_name}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">商品：</label>
+                    <div class="col-sm-10">
+                        <select  class="selectpicker" name="comm_id" id="comm_id" >
+                            <option th:value="0">请选择</option>
+                            <option th:each="o:${com}"
+                                    th:value="${o.comm_id}"
+                                    th:text="${o.comm_name}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="pc_price" class="col-sm-2 control-label">进价：</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" id="pc_price" name="pc_price">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="pc_pay" class="col-sm-2 control-label">付款方式：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="pc_pay" name="pc_pay">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="pc_date" class="col-sm-2 control-label">签订日期：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control datetimepicker" id="pc_date" name="pc_date">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="pc_period" class="col-sm-2 control-label">合同期限：</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="pc_period" name="pc_period">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" >提交</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+</body>
+<script src="/bootstrap-3.3.7-dist/js/bootstrap-datetimepicker.js"></script>
+<script src="/resources/layui/layui.js"></script>
+<script type="text/javascript">
+    layui.use(['layer', 'element', 'jquery'], function () {
+        var $ = layer = layui.layer
+            , element = layui.element,
+            jquery = layui.jquery;
+    })
+    $('.datetimepicker').datetimepicker({
+        minView: "month",
+        format: "yyyy-mm-dd",
+        language: 'zh-CN',
+        autoclose:true
+    });
+    // 进入编辑页面前的请求,返回json
+    function edit(id) {
+        $.ajax({
+            async: true,
+            type: "POST",
+            url: "/Contract/selectByid?id="+id,
+            success: addData,
+            error : function(msg) {
+                alert(msg+"错误数据");
+            },
+            dataType : "json"
+        });
+    }
+    // 查询成功后向模态框插入数据并开启模态框。data是返回的JSON对象
+    function addData(data) {
+        $("#pc_id").val(data.pc_id);
+        $("#pc_price").val(data.pc_price);
+        $("#pc_date").val(data.pc_dates);
+        $("#pc_pay").val(data.pc_pay);
+        $("#pc_period").val(data.pc_period);
+        $("#supp_id").selectpicker('val',data.supp_id);//下拉框回显
+        $("#comm_id").selectpicker('val',data.comm_id);
+        $("#ModalTitle").text("修改合同信息");
+        $("#teacherForm").attr("action","/Contract/upd");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+    //显示新增模态框
+    function add() {
+
+        $("#pc_id").val("");
+        $("#pc_price").val("");
+        $("#pc_date").val("");
+        $("#pc_pay").val("");
+        $("#pc_period").val("");
+        $("#supp_id").selectpicker(0);//下拉框回显
+        $("#comm_id").selectpicker(0);
+        $("#ModalTitle").text("新增合同信息");
+        $("#teacherForm").attr("action","/Contract/add");
+        // 显示模态框
+        $('#addEdit').modal('show');
+    }
+
+    // 删除请求
+    function del(id) {
+        var r=confirm("确定删除吗");
+        if (r==true){
+            $.ajax({
+                async: true,
+                type: "GET",
+                url: "/Contract/del?id="+id,
+                success: function () {
+                    location.href="/Contract/all";
+                },
+                error : function(msg) {
+                    alert(msg+"错误数据");
+                },
+                dataType:"text"
+            });
+        }
+    }
+</script>
+</html>
+
+
+
+
